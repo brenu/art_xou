@@ -32,8 +32,10 @@ class Client:
         self.screen.fill(self.palette["blue"])
         self.font = pygame.font.SysFont("arial", 24)
         self.is_board_pressed = False
-        self.pen_radius = 5
+        self.pen_radius = 3
         self.pen_color = "black"
+        self.pen_previous_color = "black"
+        self.mode = "paint"
                
         self.board = Board(600, 400, self.screen, self.palette)
         pygame.display.update()
@@ -51,15 +53,28 @@ class Client:
                     else:
                         possible_new_color = self.board.is_color_being_changed(x, y)
 
-                        if possible_new_color:
+                        if possible_new_color and self.mode == "paint":
                             pygame.mixer.Sound.play(self.sfx["waterdrop"])
                             self.pen_color = possible_new_color
+                        elif self.board.is_brush_clicked(x, y):
+                            self.mode = "paint"
+                            self.pen_color = self.pen_previous_color
+                        elif self.board.is_eraser_clicked(x, y):
+                            pygame.mixer.Sound.play(self.sfx["waterdrop"])
+                            self.mode = "erase"
+                            self.pen_previous_color = self.pen_color if self.pen_color != "white" else self.pen_previous_color
+                            self.pen_color = "white"
 
                 elif event.type == pygame.MOUSEBUTTONUP:
                     self.is_board_pressed = False
 
                 elif event.type == pygame.MOUSEMOTION and self.is_board_pressed == True and self.board.is_painting_inside_board(x, y, self.pen_radius):
-                    self.pen(self.screen, x, y)
+                    if self.mode == "paint":
+                        self.pen_radius = 3
+                        self.pen(self.screen, x, y)
+                    elif self.mode == "erase":
+                        self.pen_radius = 10
+                        self.pen(self.screen, x, y)
                     pygame.display.update()
 
                 elif event.type == pygame.QUIT:
