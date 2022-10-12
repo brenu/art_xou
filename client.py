@@ -2,6 +2,8 @@ import os
 import pygame
 
 from board import Board
+from chat import Chat
+from ranking import Ranking
 
 class Client:
     def __init__(self):
@@ -10,6 +12,7 @@ class Client:
         self.screen = pygame.display.set_mode((1280, 720))
         pygame.display.set_caption("Art Xou")
 
+        self.default_padding = 14
         self.palette = {
             "blue": (30,129,176),
             "white": (255,255,255),
@@ -37,8 +40,11 @@ class Client:
         self.pen_previous_color = "black"
         self.mode = "paint"
                
-        self.board = Board(600, 400, self.screen, self.palette)
+        self.board = Board(600, 400, self, self.palette)
         pygame.display.update()
+
+        self.ranking = Ranking(188, 400, self, self.palette)
+        self.chat = Chat(435, 696, self, self.palette)
 
     def pen(self, screen, x, y):
         pygame.draw.circle( screen, self.palette[self.pen_color], ( x, y ), self.pen_radius )
@@ -79,8 +85,12 @@ class Client:
 
                 elif event.type == pygame.QUIT:
                     pygame.quit()
+
+                elif event.type == pygame.KEYDOWN:
+                    self.chat.update([event])
             
             self.drawScreen()
+            self.chat.update([])
 
     def drawScreen(self):
         pygame.display.update()

@@ -2,18 +2,18 @@ import pygame
 from pygame import gfxdraw
 
 class Board:
-    def __init__(self, width, height, screen, palette):
-        self.padding = 10
+    def __init__(self, width, height, client, palette):
+        self.padding = 14
         self.width = width
         self.height = height
 
         self.palette = palette
         self.board_rect = pygame.Rect(self.padding, self.padding, width, height)
-        self.subsurface = screen.subsurface(self.board_rect)
+        self.subsurface = client.screen.subsurface(self.board_rect)
         self.subsurface.fill(palette["white"])
 
         self.options_container_rect = pygame.Rect(self.padding, self.padding*2+height, width, 42)
-        self.options_container = screen.subsurface(self.options_container_rect)
+        self.options_container = client.screen.subsurface(self.options_container_rect)
         
         self.button_icons = {
             "brush": pygame.image.load("assets/icons/brush.png").convert_alpha(),

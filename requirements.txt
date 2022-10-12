@@ -1,2 +1,3 @@
 pygame==2.1.2
-numpy=1.23.3
+numpy==1.23.3
+pygame-textinput==1.0.1
