@@ -1,9 +1,19 @@
 import os
+import sys
+import threading
 import pygame
+import socket
 
 from board import Board
 from chat import Chat
 from ranking import Ranking
+from server import Server
+
+HOST = socket.gethostbyname(socket.gethostname())
+PORT = 65432
+SERVER_ADDRESS = (HOST, PORT)
+DEFAULT_STRING_FORMAT = "utf-8"
+MESSAGE_LENGTH_HEADER_LENGTH = 128
 
 class Client:
     def __init__(self):
@@ -45,6 +55,23 @@ class Client:
 
         self.ranking = Ranking(188, 400, self, self.palette)
         self.chat = Chat(435, 696, self, self.palette)
+
+        self.server = Server() if sys.argv[1] == "server" else None
+        
+        self.connected_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.connected_client.connect((socket.gethostbyname(socket.gethostname()), 65431))
+
+        threading.Thread(target=self.handle_incoming_data).start()
+
+    def handle_incoming_data(self):
+        while True:
+            initial_packet = self.connected_client.recv(MESSAGE_LENGTH_HEADER_LENGTH).decode(DEFAULT_STRING_FORMAT)
+
+            if initial_packet:
+                incoming_message_length = int(initial_packet)
+
+                message = self.connected_client.recv(incoming_message_length).decode(DEFAULT_STRING_FORMAT)
+                self.chat.update_messages_list(message)
 
     def pen(self, screen, x, y):
         pygame.draw.circle( screen, self.palette[self.pen_color], ( x, y ), self.pen_radius )
