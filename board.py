@@ -71,3 +71,6 @@ class Board:
                 color_found = color
 
         return color_found
+
+    def send_board_update():
+        pass

@@ -1,5 +1,6 @@
 import pygame
 import pygame_textinput
+import json
 
 DEFAULT_STRING_FORMAT = "utf-8"
 MESSAGE_LENGTH_HEADER_LENGTH = 128
@@ -56,10 +57,17 @@ class Chat:
     def update_messages_list(self, new_message):
         self.messages.insert(0, new_message)
 
+        if len(self.messages) > 21:
+            self.messages.pop()
+
     def send_answer(self, answer):
         self.update_messages_list(f"You: {answer}")
         
-        answer = answer.encode(DEFAULT_STRING_FORMAT)
+        answer = json.dumps({
+            "type": "answer",
+            "author": self.client.name,
+            "data": answer
+        }).encode(DEFAULT_STRING_FORMAT)
         answer_length = ("0"*(MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(answer)))) + str(len(answer))).encode(DEFAULT_STRING_FORMAT)
 
         self.client.connected_client.sendall(answer_length)

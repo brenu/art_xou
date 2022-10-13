@@ -21,6 +21,7 @@ class Client:
         pygame.init()
         self.screen = pygame.display.set_mode((1280, 720))
         pygame.display.set_caption("Art Xou")
+        self.name = "Fulano"
 
         self.default_padding = 14
         self.palette = {
@@ -59,7 +60,7 @@ class Client:
         self.server = Server() if sys.argv[1] == "server" else None
         
         self.connected_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connected_client.connect((socket.gethostbyname(socket.gethostname()), 65431))
+        self.connected_client.connect((socket.gethostbyname(socket.gethostname()), 65432))
 
         threading.Thread(target=self.handle_incoming_data).start()
 
