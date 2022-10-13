@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import threading
@@ -9,9 +10,7 @@ from chat import Chat
 from ranking import Ranking
 from server import Server
 
-HOST = socket.gethostbyname(socket.gethostname())
 PORT = 65432
-SERVER_ADDRESS = (HOST, PORT)
 DEFAULT_STRING_FORMAT = "utf-8"
 MESSAGE_LENGTH_HEADER_LENGTH = 128
 
@@ -60,7 +59,7 @@ class Client:
         self.server = Server() if sys.argv[1] == "server" else None
         
         self.connected_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connected_client.connect((socket.gethostbyname(socket.gethostname()), 65432))
+        self.connected_client.connect((socket.gethostbyname(socket.gethostname()), PORT))
 
         threading.Thread(target=self.handle_incoming_data).start()
 
@@ -72,10 +71,17 @@ class Client:
                 incoming_message_length = int(initial_packet)
 
                 message = self.connected_client.recv(incoming_message_length).decode(DEFAULT_STRING_FORMAT)
-                self.chat.update_messages_list(message)
+                object = json.loads(message)
+
+                if object["type"] == "answer":
+                    self.chat.update_messages_list(object["data"])
+                elif object["type"] == "board_update":
+                    pygame.draw.circle(self.screen, object["data"]["color"], ( object["data"]["x"], object["data"]["y"] ), object["data"]["radius"] )
+                
 
     def pen(self, screen, x, y):
         pygame.draw.circle( screen, self.palette[self.pen_color], ( x, y ), self.pen_radius )
+        self.send_board_update(self.palette[self.pen_color], self.pen_radius, x, y)
 
     def run(self):
         while True: 
@@ -122,3 +128,19 @@ class Client:
 
     def drawScreen(self):
         pygame.display.update()
+
+    def send_board_update(self, color, radius, x, y):
+        update = json.dumps({
+            "type": "board_update",
+            "author": self.name,
+            "data": {
+                "color": color,
+                "radius": radius,
+                "x": x,
+                "y": y
+            }
+        }).encode(DEFAULT_STRING_FORMAT)
+        update_length = ("0"*(MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(update)))) + str(len(update))).encode(DEFAULT_STRING_FORMAT)
+
+        self.connected_client.sendall(update_length)
+        self.connected_client.sendall(update)
