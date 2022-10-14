@@ -15,28 +15,13 @@ DEFAULT_STRING_FORMAT = "utf-8"
 MESSAGE_LENGTH_HEADER_LENGTH = 128
 
 class Client:
-    def __init__(self):
-        pygame.mixer.init()
-        pygame.init()
-        self.screen = pygame.display.set_mode((1280, 720))
-        pygame.display.set_caption("Art Xou")
-        self.name = "Fulano"
+    def __init__(self, screen, palette, name, server=False):
+        self.screen = screen
+        self.navigate = None
+        self.name = name
 
         self.default_padding = 14
-        self.palette = {
-            "blue": (30,129,176),
-            "white": (255,255,255),
-            "black": (10,10,10),
-            "red": (255, 85, 85),
-            "cyano": (68, 187, 187),
-            "green": (96, 210, 5),
-            "purple": (136, 58, 234),
-            "pink": (252, 123, 255),
-            "yellow": (253, 227, 137),
-            "orange": (254, 171, 95),
-            "navy_blue": (29, 89, 132),
-            "gray_border": (231, 228, 228)
-        }
+        self.palette = palette
 
         self.sfx = {
             "waterdrop": pygame.mixer.Sound('assets/sfx/waterdrop.ogg')
@@ -56,12 +41,18 @@ class Client:
         self.ranking = Ranking(188, 400, self, self.palette)
         self.chat = Chat(435, 696, self, self.palette)
 
-        self.server = Server() if sys.argv[1] == "server" else None
+        self.server = Server(self) if server == True else None
         
         self.connected_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connected_client.connect((socket.gethostbyname(socket.gethostname()), PORT))
 
-        threading.Thread(target=self.handle_incoming_data).start()
+        try:
+            self.connected_client.connect((socket.gethostbyname(socket.gethostname()), PORT))
+            
+            threading.Thread(target=self.handle_incoming_data).start()
+        except:
+            self.navigate = "menu"
+            self.error = "Não foi possível se conectar ao servidor"
+
 
     def handle_incoming_data(self):
         while True:
@@ -83,8 +74,25 @@ class Client:
         pygame.draw.circle( screen, self.palette[self.pen_color], ( x, y ), self.pen_radius )
         self.send_board_update(self.palette[self.pen_color], self.pen_radius, x, y)
 
+    def draw_base_components(self):
+        self.ranking.clear()
+        self.chat.clear()
+        self.board.clear()
+
     def run(self):
+        self.screen.fill(self.palette["blue"])
+        self.draw_base_components()
+        self.is_running = True
         while True: 
+            if self.navigate:
+                self.connected_client.close()
+                if self.server:
+                    for client in self.server.clients:
+                        client.close()
+                    self.server.server.close()
+
+                return
+
             ( x, y ) = pygame.mouse.get_pos()
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -121,10 +129,15 @@ class Client:
                     pygame.quit()
 
                 elif event.type == pygame.KEYDOWN:
+                    if event.unicode == "\x1b":
+                        self.navigate = "menu"
                     self.chat.update([event])
             
             self.drawScreen()
             self.chat.update([])
+    
+    def stop(self):
+        self.is_running = False
 
     def drawScreen(self):
         pygame.display.update()

@@ -6,18 +6,25 @@ import os
 PORT = 65432
 
 class Server:
-    def __init__(self):
+    def __init__(self, game_client):
         self.host = socket.gethostbyname(socket.gethostname())
         self.port = PORT
         self.server_address = (self.host, self.port)
         self.default_string_format = "utf-8"
         self.message_length_header_length = 128
         self.clients = []
+        self.game_client = game_client
 
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server.bind(self.server_address)
+        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        
+        try:
+            self.server.bind(self.server_address)
+            threading.Thread(target=self.handle_connections, args=[]).start()
+        except:
+            self.game_client.navigate = "menu"
+            self.game_client.error = "Não foi possível criar a partida, tente novamente!"
 
-        threading.Thread(target=self.handle_connections, args=[]).start()
 
 
     def handle_connections(self):

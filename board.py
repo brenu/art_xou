@@ -26,6 +26,7 @@ class Board:
             "circle": pygame.image.load("assets/icons/circle.png").convert_alpha(),
         }
 
+        self.palette = palette
         self.possible_colors = ["black", "red", "cyano", "green", "purple", "pink", "yellow", "white", "orange", "navy_blue"]
         self.color_btn_diameter = 30
 
@@ -39,6 +40,23 @@ class Board:
 
             gfxdraw.aacircle(self.options_container, 18 + index*(13+30), 21, 12, palette[color])
             gfxdraw.filled_circle(self.options_container, 18 + index*(13+30), 21, 12, palette[color])
+
+        pygame.draw.rect(self.options_container, self.palette["white"], pygame.Rect(18 + (len(self.possible_colors)-1)*(13+30)+25,1,4,38), 0, 5)
+
+        for key, icon in enumerate(self.button_icons.keys()):
+            self.options_container.blit(self.button_icons[icon],((len(self.possible_colors)+key)*(13+30)+14,8))
+
+    def clear(self):
+        self.subsurface.fill(self.palette["white"])
+
+        for index, color in enumerate(self.possible_colors):
+            border_color = "white"
+
+            gfxdraw.aacircle(self.options_container, 18 + index*(13+30), 21, 15, self.palette[border_color])
+            gfxdraw.filled_circle(self.options_container, 18 + index*(13+30), 21, 15, self.palette[border_color])
+
+            gfxdraw.aacircle(self.options_container, 18 + index*(13+30), 21, 12, self.palette[color])
+            gfxdraw.filled_circle(self.options_container, 18 + index*(13+30), 21, 12, self.palette[color])
 
         pygame.draw.rect(self.options_container, self.palette["white"], pygame.Rect(18 + (len(self.possible_colors)-1)*(13+30)+25,1,4,38), 0, 5)
 
