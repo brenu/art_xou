@@ -1,7 +1,7 @@
 import threading
 import pygame
-from client import Client
-from menu import Menu
+from source.screens.client import Client
+from source.screens.menu import Menu
 import gc
 
 def main():

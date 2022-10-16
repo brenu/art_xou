@@ -5,10 +5,10 @@ import threading
 import pygame
 import socket
 
-from board import Board
-from chat import Chat
-from ranking import Ranking
-from server import Server
+from source.screens.client_partials.board import Board
+from source.screens.client_partials.chat import Chat
+from source.screens.client_partials.ranking import Ranking
+from source.core.server import Server
 
 PORT = 65432
 DEFAULT_STRING_FORMAT = "utf-8"
