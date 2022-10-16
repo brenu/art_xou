@@ -56,18 +56,21 @@ class Client:
 
     def handle_incoming_data(self):
         while True:
-            initial_packet = self.connected_client.recv(MESSAGE_LENGTH_HEADER_LENGTH).decode(DEFAULT_STRING_FORMAT)
+            try:
+                initial_packet = self.connected_client.recv(MESSAGE_LENGTH_HEADER_LENGTH).decode(DEFAULT_STRING_FORMAT)
 
-            if initial_packet:
-                incoming_message_length = int(initial_packet)
+                if initial_packet:
+                    incoming_message_length = int(initial_packet)
 
-                message = self.connected_client.recv(incoming_message_length).decode(DEFAULT_STRING_FORMAT)
-                object = json.loads(message)
+                    message = self.connected_client.recv(incoming_message_length).decode(DEFAULT_STRING_FORMAT)
+                    object = json.loads(message)
 
-                if object["type"] == "answer":
-                    self.chat.update_messages_list(object["data"])
-                elif object["type"] == "board_update":
-                    pygame.draw.circle(self.screen, object["data"]["color"], ( object["data"]["x"], object["data"]["y"] ), object["data"]["radius"] )
+                    if object["type"] == "answer":
+                        self.chat.update_messages_list(object["data"])
+                    elif object["type"] == "board_update":
+                        pygame.draw.circle(self.screen, object["data"]["color"], ( object["data"]["x"], object["data"]["y"] ), object["data"]["radius"] )
+            except:
+                return
                 
 
     def pen(self, screen, x, y):
@@ -79,18 +82,24 @@ class Client:
         self.chat.clear()
         self.board.clear()
 
+    def close_server_sockets(self):
+        self.connected_client.shutdown(socket.SHUT_RDWR)
+        self.connected_client.close()
+        if self.server:
+            for client in self.server.clients:
+                client.shutdown(socket.SHUT_RDWR)
+                client.close()
+            
+            self.server.server.shutdown(socket.SHUT_RDWR)
+            self.server.server.close()
+
     def run(self):
         self.screen.fill(self.palette["blue"])
         self.draw_base_components()
         self.is_running = True
         while True: 
             if self.navigate:
-                self.connected_client.close()
-                if self.server:
-                    for client in self.server.clients:
-                        client.close()
-                    self.server.server.close()
-
+                self.close_server_sockets()
                 return
 
             ( x, y ) = pygame.mouse.get_pos()
@@ -126,7 +135,9 @@ class Client:
                     pygame.display.update()
 
                 elif event.type == pygame.QUIT:
+                    self.close_server_sockets()
                     pygame.quit()
+                    sys.exit()
 
                 elif event.type == pygame.KEYDOWN:
                     if event.unicode == "\x1b":

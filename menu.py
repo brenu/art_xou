@@ -1,3 +1,4 @@
+import sys
 import pygame
 
 
@@ -48,6 +49,9 @@ class Menu():
                     elif self.has_clicked_join_button(x, y):
                         self.navigate = "game"
                         self.server = False
+                elif event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
 
             
             self.drawScreen()
