@@ -30,7 +30,7 @@ class Menu():
         create_text = self.font.render("criar partida", True, self.palette["white"])        
         self.screen.blit(create_text, create_text.get_rect(center=self.create_button.center))
 
-        self.drawScreen()
+        self.draw_screen()
 
     def run(self):
         self.screen.fill(self.palette["blue"])
@@ -47,14 +47,13 @@ class Menu():
                         self.server = True
                         print("clicou")
                     elif self.has_clicked_join_button(x, y):
-                        self.navigate = "game"
-                        self.server = False
+                        self.navigate = "match_finder"
                 elif event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
             
-            self.drawScreen()
+            self.draw_screen()
 
     def stop(self):
         self.is_running = False
@@ -65,5 +64,5 @@ class Menu():
     def has_clicked_join_button(self, x, y):
         return self.join_button.collidepoint(x, y)
 
-    def drawScreen(self):
+    def draw_screen(self):
         pygame.display.update()

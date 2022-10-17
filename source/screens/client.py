@@ -144,13 +144,13 @@ class Client:
                         self.navigate = "menu"
                     self.chat.update([event])
             
-            self.drawScreen()
+            self.draw_screen()
             self.chat.update([])
     
     def stop(self):
         self.is_running = False
 
-    def drawScreen(self):
+    def draw_screen(self):
         pygame.display.update()
 
     def send_board_update(self, color, radius, x, y):
