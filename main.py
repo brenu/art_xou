@@ -1,6 +1,7 @@
 import threading
 import pygame
 from source.screens.client import Client
+from source.screens.match_finder import MatchFinder
 from source.screens.menu import Menu
 import gc
 
@@ -29,6 +30,7 @@ def main():
 
     client = None
     menu = None
+    match_finder = None
 
     while True:
         if not ran:
@@ -37,8 +39,16 @@ def main():
                 menu = Menu(screen, palette)
                 menu.run()
             elif mode == "game":
-                client = Client(screen, palette, "DonoDaBola" if menu.server else "Fulano", menu.server)
+                client = Client(
+                    screen,
+                    palette, "DonoDaBola" if menu.server else "Fulano",
+                    match_finder.selected_match["address"].split(":") if match_finder else ("localhost", 65432),
+                    menu.server
+                )
                 client.run()
+            elif mode == "match_finder":
+                match_finder = MatchFinder(screen, palette)
+                match_finder.run()
         else:
             if mode == "menu" and menu.navigate:
                 ran = False
@@ -46,6 +56,9 @@ def main():
             elif mode == "game" and client.navigate:
                 ran = False
                 mode = client.navigate
+            elif mode == "match_finder" and match_finder.navigate:
+                ran = False
+                mode = match_finder.navigate
 
 
 if __name__ == "__main__":

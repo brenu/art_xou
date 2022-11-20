@@ -10,12 +10,11 @@ from source.screens.client_partials.chat import Chat
 from source.screens.client_partials.ranking import Ranking
 from source.core.server import Server
 
-PORT = 65432
 DEFAULT_STRING_FORMAT = "utf-8"
 MESSAGE_LENGTH_HEADER_LENGTH = 128
 
 class Client:
-    def __init__(self, screen, palette, name, server=False):
+    def __init__(self, screen, palette, name, game_address, server=False):
         self.screen = screen
         self.navigate = None
         self.name = name
@@ -46,15 +45,20 @@ class Client:
         self.connected_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         try:
-            self.connected_client.connect((socket.gethostbyname(socket.gethostname()), PORT))
+            if server:
+                self.connected_client.connect((self.server.host, self.server.port))
+            else:
+                self.connected_client.connect((game_address[0], 65432))
             
             threading.Thread(target=self.handle_incoming_data).start()
-        except:
+        except Exception as e:
+            print(e)
             self.navigate = "menu"
             self.error = "Não foi possível se conectar ao servidor"
 
 
     def handle_incoming_data(self):
+        self.join_match()
         while True:
             try:
                 initial_packet = self.connected_client.recv(MESSAGE_LENGTH_HEADER_LENGTH).decode(DEFAULT_STRING_FORMAT)
@@ -64,7 +68,7 @@ class Client:
 
                     message = self.connected_client.recv(incoming_message_length).decode(DEFAULT_STRING_FORMAT)
                     object = json.loads(message)
-
+                    
                     if object["type"] == "answer":
                         self.chat.update_messages_list(object["data"])
                     elif object["type"] == "board_update":
@@ -168,3 +172,15 @@ class Client:
 
         self.connected_client.sendall(update_length)
         self.connected_client.sendall(update)
+
+    def join_match(self):
+        request_body = json.dumps({
+            "type": "join",
+            "data": {
+                "name": self.name
+            }
+        }).encode(DEFAULT_STRING_FORMAT)
+        request_length = ("0"*(MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(request_body)))) + str(len(request_body))).encode(DEFAULT_STRING_FORMAT)
+
+        self.connected_client.sendall(request_length)
+        self.connected_client.sendall(request_body)

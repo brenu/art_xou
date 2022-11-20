@@ -45,7 +45,6 @@ class Menu():
                     if self.has_clicked_create_button(x, y):
                         self.navigate = "game"
                         self.server = True
-                        print("clicou")
                     elif self.has_clicked_join_button(x, y):
                         self.navigate = "match_finder"
                 elif event.type == pygame.QUIT:
