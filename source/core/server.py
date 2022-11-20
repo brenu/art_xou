@@ -20,6 +20,8 @@ class Server:
         self.client_names = []
         self.game_client = game_client
 
+        self.possible_words = open("source/core/words.txt", "r", encoding="utf-8").read().splitlines()
+
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         
         try:
