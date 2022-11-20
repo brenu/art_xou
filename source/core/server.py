@@ -57,9 +57,12 @@ class Server:
                     if object["type"] == "match_info":
                         object["data"] = {"name": self.match_name}
                     elif object["type"] == "join":
-                        self.clients.append(connection)
-                        self.client_names.append(object["data"]["name"])
-                        object["data"] = {"success": True}
+                        if not object["data"]["name"] in self.client_names:
+                            self.clients.append(connection)
+                            self.client_names.append(object["data"]["name"])
+                            object["data"] = {"success": True}
+                        else:
+                            object["data"] = {"success": False}
                     elif object["type"] == "answer":
                         # Remeber, in the future, to verify if the answer is correct or not
                         object["data"] = f"{object['author']}: {object['data']}"
@@ -70,6 +73,11 @@ class Server:
                     if object["type"] == "match_info" or object["type"] == "join":
                         connection.sendall(message_length)
                         connection.sendall(message)
+
+                        if object["data"].get("success") == False:
+                            connection.shutdown(socket.SHUT_RDWR)
+                            connection.close()
+                            break
                     else:
                         for client in self.clients:
                             if client != connection:

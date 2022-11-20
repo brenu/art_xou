@@ -184,3 +184,15 @@ class Client:
 
         self.connected_client.sendall(request_length)
         self.connected_client.sendall(request_body)
+
+        initial_packet = self.connected_client.recv(MESSAGE_LENGTH_HEADER_LENGTH).decode(DEFAULT_STRING_FORMAT)
+
+        if initial_packet:
+            incoming_message_length = int(initial_packet)
+
+            message = self.connected_client.recv(incoming_message_length).decode(DEFAULT_STRING_FORMAT)
+            object = json.loads(message)
+
+            if not object["data"].get("success"):
+                self.navigate = "menu"
+                self.error = "Oops!"
