@@ -22,8 +22,6 @@ class Board:
         self.button_icons = {
             "brush": pygame.image.load("assets/icons/brush.png").convert_alpha(),
             "eraser": pygame.image.load("assets/icons/eraser.png").convert_alpha(),
-            "square": pygame.image.load("assets/icons/square.png").convert_alpha(),
-            "circle": pygame.image.load("assets/icons/circle.png").convert_alpha(),
         }
 
         self.palette = palette
