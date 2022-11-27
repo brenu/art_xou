@@ -49,6 +49,26 @@ class Server:
                 self.word_of_the_round = self.possible_words[random.randint(0, len(self.possible_words)-1)]
                 self.drawing_player_name = self.client_names[random.randint(0, len(self.client_names)-1)]
 
+                new_round_message = {
+                    "type": "new_round",
+                    "data": {}
+                }
+
+                message = json.dumps(new_round_message).encode(self.default_string_format)
+                message_length = ("0"*(self.message_length_header_length - len(str(len(message)))) + str(len(message))).encode(self.default_string_format)
+
+                new_round_message["data"]["word"] = self.word_of_the_round
+                special_message = json.dumps(new_round_message).encode(self.default_string_format)
+                special_message_length = ("0"*(self.message_length_header_length - len(str(len(special_message)))) + str(len(special_message))).encode(self.default_string_format)
+
+                for index, connection in enumerate(self.clients):
+                    if self.client_names[index] == self.drawing_player_name:
+                        connection.sendall(special_message_length)
+                        connection.sendall(special_message)
+                    else:
+                        connection.sendall(message_length)
+                        connection.sendall(message)
+
 
     def handle_connections(self):
         self.server.listen()
@@ -82,7 +102,10 @@ class Server:
                             object["data"] = {"success": False}
                     elif object["type"] == "answer":
                         # Remeber, in the future, to verify if the answer is correct or not
-                        object["data"] = f"{object['author']}: {object['data']}"
+                        connection_index = self.clients.index(connection)
+                        author = self.client_names[connection_index]
+
+                        object["data"] = f"{author}: {object['data']}"
                         
                     message = json.dumps(object).encode(self.default_string_format)
                     message_length = ("0"*(self.message_length_header_length - len(str(len(message)))) + str(len(message))).encode(self.default_string_format)

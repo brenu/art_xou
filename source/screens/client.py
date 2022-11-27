@@ -33,6 +33,8 @@ class Client:
         self.pen_color = "black"
         self.pen_previous_color = "black"
         self.mode = "paint"
+
+        self.word_to_draw = None
                
         self.board = Board(600, 400, self, self.palette)
         pygame.display.update()
@@ -73,6 +75,12 @@ class Client:
                         self.chat.update_messages_list(object["data"])
                     elif object["type"] == "board_update":
                         pygame.draw.circle(self.screen, object["data"]["color"], ( object["data"]["x"], object["data"]["y"] ), object["data"]["radius"] )
+                    elif object["type"] == "new_round":
+                        if object["data"].get("word"):
+                            self.board.clear(True)
+                            self.word_to_draw = object["data"].get("word")
+                        else:
+                            self.board.clear(False)
             except:
                 return
                 
@@ -83,7 +91,7 @@ class Client:
     def draw_base_components(self):
         self.ranking.clear()
         self.chat.clear()
-        self.board.clear()
+        self.board.clear(False)
 
     def close_server_sockets(self):
         self.connected_client.shutdown(socket.SHUT_RDWR)
@@ -163,7 +171,6 @@ class Client:
     def send_board_update(self, color, radius, x, y):
         update = json.dumps({
             "type": "board_update",
-            "author": self.name,
             "data": {
                 "color": color,
                 "radius": radius,

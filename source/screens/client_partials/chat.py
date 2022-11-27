@@ -65,7 +65,6 @@ class Chat:
         
         answer = json.dumps({
             "type": "answer",
-            "author": self.client.name,
             "data": answer
         }).encode(DEFAULT_STRING_FORMAT)
         answer_length = ("0"*(MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(answer)))) + str(len(answer))).encode(DEFAULT_STRING_FORMAT)

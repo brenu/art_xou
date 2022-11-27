@@ -44,22 +44,24 @@ class Board:
         for key, icon in enumerate(self.button_icons.keys()):
             self.options_container.blit(self.button_icons[icon],((len(self.possible_colors)+key)*(13+30)+14,8))
 
-    def clear(self):
+    def clear(self, draw_options):
         self.subsurface.fill(self.palette["white"])
+        self.options_container.fill(self.palette["blue"])
 
-        for index, color in enumerate(self.possible_colors):
-            border_color = "white"
+        if draw_options:
+            for index, color in enumerate(self.possible_colors):
+                border_color = "white"
 
-            gfxdraw.aacircle(self.options_container, 18 + index*(13+30), 21, 15, self.palette[border_color])
-            gfxdraw.filled_circle(self.options_container, 18 + index*(13+30), 21, 15, self.palette[border_color])
+                gfxdraw.aacircle(self.options_container, 18 + index*(13+30), 21, 15, self.palette[border_color])
+                gfxdraw.filled_circle(self.options_container, 18 + index*(13+30), 21, 15, self.palette[border_color])
 
-            gfxdraw.aacircle(self.options_container, 18 + index*(13+30), 21, 12, self.palette[color])
-            gfxdraw.filled_circle(self.options_container, 18 + index*(13+30), 21, 12, self.palette[color])
+                gfxdraw.aacircle(self.options_container, 18 + index*(13+30), 21, 12, self.palette[color])
+                gfxdraw.filled_circle(self.options_container, 18 + index*(13+30), 21, 12, self.palette[color])
 
-        pygame.draw.rect(self.options_container, self.palette["white"], pygame.Rect(18 + (len(self.possible_colors)-1)*(13+30)+25,1,4,38), 0, 5)
+            pygame.draw.rect(self.options_container, self.palette["white"], pygame.Rect(18 + (len(self.possible_colors)-1)*(13+30)+25,1,4,38), 0, 5)
 
-        for key, icon in enumerate(self.button_icons.keys()):
-            self.options_container.blit(self.button_icons[icon],((len(self.possible_colors)+key)*(13+30)+14,8))
+            for key, icon in enumerate(self.button_icons.keys()):
+                self.options_container.blit(self.button_icons[icon],((len(self.possible_colors)+key)*(13+30)+14,8))
     
     def is_brush_clicked(self, x, y):
         brush_index = list(self.button_icons.keys()).index("brush")
