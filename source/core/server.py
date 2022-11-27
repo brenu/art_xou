@@ -92,7 +92,10 @@ class Server:
                     break
             except Exception as e:
                 print(e)
-                return
+                connection.shutdown(socket.SHUT_RDWR)
+                connection.close()
+                break
 
         if connection in self.clients:
+            connection.close()
             self.clients.remove(connection)

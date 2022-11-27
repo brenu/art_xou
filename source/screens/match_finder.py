@@ -67,15 +67,22 @@ class MatchFinder:
         for i in range(2, 255):
             possible_device_address = f"{'.'.join(splitted_network_address)}.{i}"
             try:
-                match_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                match_socket.settimeout(0.05)
-                match_socket.connect((possible_device_address, 65432))
-
-                self.handle_match_info(match_socket)
-                match_socket.shutdown(socket.SHUT_RDWR)
-                match_socket.close()
+                threading.Thread(target=self.get_available_match, args=[possible_device_address]).start()
             except:
                 continue
+
+    def get_available_match(self, address):
+        match_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        match_socket.settimeout(0.05)
+        try:
+            match_socket.connect((address, 65432))
+
+            self.handle_match_info(match_socket)
+            match_socket.shutdown(socket.SHUT_RDWR)
+            match_socket.close()
+        except:
+            match_socket.close()
+            return
 
     def draw_available_matches(self):
         for index, match in enumerate(self.matches):
