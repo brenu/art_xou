@@ -79,7 +79,6 @@ class Client:
 
     def pen(self, screen, x, y):
         pygame.draw.circle( screen, self.palette[self.pen_color], ( x, y ), self.pen_radius )
-        self.send_board_update(self.palette[self.pen_color], self.pen_radius, x, y)
 
     def draw_base_components(self):
         self.ranking.clear()
@@ -132,10 +131,10 @@ class Client:
                 elif event.type == pygame.MOUSEMOTION and self.is_board_pressed == True and self.board.is_painting_inside_board(x, y, self.pen_radius):
                     if self.mode == "paint":
                         self.pen_radius = 3
-                        self.pen(self.screen, x, y)
+                        self.send_board_update(self.palette[self.pen_color], self.pen_radius, x, y)
                     elif self.mode == "erase":
                         self.pen_radius = 10
-                        self.pen(self.screen, x, y)
+                        self.send_board_update(self.palette[self.pen_color], self.pen_radius, x, y)
                     pygame.display.update()
 
                 elif event.type == pygame.QUIT:

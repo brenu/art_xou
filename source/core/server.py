@@ -1,7 +1,7 @@
 import json
 import threading
 import socket
-import os
+import random
 
 PORT = 65432
 
@@ -16,12 +16,14 @@ class Server:
         self.server_address = (self.host, self.port)
         self.default_string_format = "utf-8"
         self.message_length_header_length = 128
+        
+        self.possible_words = open("source/core/words.txt", "r", encoding="utf-8").read().splitlines()
         self.clients = []
         self.client_names = []
+        self.drawing_player_name = "DonoDaBola"
+        self.word_of_the_round = self.possible_words[random.randint(0, len(self.possible_words))]
+
         self.game_client = game_client
-
-        self.possible_words = open("source/core/words.txt", "r", encoding="utf-8").read().splitlines()
-
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         
         try:
@@ -79,8 +81,11 @@ class Server:
                             connection.close()
                             break
                     else:
-                        for client in self.clients:
-                            if client != connection:
+                        connection_index = self.clients.index(connection)
+                        connection_player_name = self.client_names[connection_index]
+
+                        if connection_player_name == self.drawing_player_name:
+                            for client in self.clients:
                                 client.sendall(message_length)
                                 client.sendall(message)
                 else:
