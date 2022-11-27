@@ -95,6 +95,11 @@ class Server:
                             connection.shutdown(socket.SHUT_RDWR)
                             connection.close()
                             break
+                    elif object["type"] == "answer":
+                        for client in self.clients:
+                            if client != connection:
+                                client.sendall(message_length)
+                                client.sendall(message)
                     else:
                         connection_index = self.clients.index(connection)
                         connection_player_name = self.client_names[connection_index]
