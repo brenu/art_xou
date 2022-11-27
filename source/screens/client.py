@@ -90,11 +90,15 @@ class Client:
         self.connected_client.close()
         if self.server:
             for client in self.server.clients:
-                client.shutdown(socket.SHUT_RDWR)
-                client.close()
+                try:
+                    client.shutdown(socket.SHUT_RDWR)
+                    client.close()
+                except:
+                    continue
             
             self.server.server.shutdown(socket.SHUT_RDWR)
             self.server.server.close()
+            self.server.open = False
 
     def run(self):
         self.screen.fill(self.palette["blue"])

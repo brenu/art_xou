@@ -2,6 +2,8 @@ import json
 import threading
 import socket
 import random
+import datetime
+import time
 
 PORT = 65432
 
@@ -22,6 +24,8 @@ class Server:
         self.client_names = []
         self.drawing_player_name = "DonoDaBola"
         self.word_of_the_round = self.possible_words[random.randint(0, len(self.possible_words))]
+        self.round_start_time = datetime.datetime.now()
+        self.open = True
 
         self.game_client = game_client
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -29,10 +33,21 @@ class Server:
         try:
             self.server.bind(self.server_address)
             threading.Thread(target=self.handle_connections, args=[]).start()
+            threading.Thread(target=self.handle_rounds, args=[]).start()
         except:
             self.game_client.navigate = "menu"
             self.game_client.error = "Não foi possível criar a partida, tente novamente!"
 
+
+    def handle_rounds(self):
+        while True:
+            time.sleep(0.1)
+            if self.open == False:
+                return
+            if datetime.datetime.now() >= self.round_start_time + datetime.timedelta(minutes=2):
+                self.round_start_time = datetime.datetime.now()
+                self.word_of_the_round = self.possible_words[random.randint(0, len(self.possible_words)-1)]
+                self.drawing_player_name = self.client_names[random.randint(0, len(self.client_names)-1)]
 
 
     def handle_connections(self):
@@ -98,4 +113,6 @@ class Server:
 
         if connection in self.clients:
             connection.close()
-            self.clients.remove(connection)
+            connection_index = self.clients.index(connection)
+            self.clients.pop(connection_index)
+            self.client_names.pop(connection_index)
