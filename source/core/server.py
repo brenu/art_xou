@@ -4,7 +4,7 @@ import socket
 import random
 import datetime
 import time
-from game_consts import GameConsts
+from source.core.game_consts import GameConsts
 
 game_consts = GameConsts()
 
