@@ -59,6 +59,7 @@ def main():
             elif mode == "match_finder" and match_finder.navigate:
                 ran = False
                 mode = match_finder.navigate
+                match_finder = None
 
 
 if __name__ == "__main__":

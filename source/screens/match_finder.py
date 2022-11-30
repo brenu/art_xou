@@ -49,6 +49,9 @@ class MatchFinder:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.has_clicked_on_match(x, y):
                         self.navigate = "game"
+                elif event.type == pygame.KEYDOWN:
+                    if event.unicode == "\x1b":
+                        self.navigate = "menu"
                 elif event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()

@@ -22,9 +22,11 @@ class Server:
         self.possible_words = open("source/core/words.txt", "r", encoding="utf-8").read().splitlines()
         self.clients = []
         self.client_names = []
+        self.ranking = []
         self.drawing_player_name = "DonoDaBola"
         self.word_of_the_round = self.possible_words[random.randint(0, len(self.possible_words))]
         self.round_start_time = datetime.datetime.now()
+        self.correct_answers = 0
         self.open = True
 
         self.game_client = game_client
@@ -97,15 +99,27 @@ class Server:
                         if not object["data"]["name"] in self.client_names:
                             self.clients.append(connection)
                             self.client_names.append(object["data"]["name"])
+                            self.ranking.append({ "name": object["data"]["name"], "score": 0})
                             object["data"] = {"success": True}
                         else:
                             object["data"] = {"success": False}
                     elif object["type"] == "answer":
-                        # Remeber, in the future, to verify if the answer is correct or not
                         connection_index = self.clients.index(connection)
                         author = self.client_names[connection_index]
 
-                        object["data"] = f"{author}: {object['data']}"
+                        if author == self.drawing_player_name:
+                            continue
+
+                        if object["data"] == self.word_of_the_round:
+                            if self.correct_answers < 10:
+                                self.ranking[connection_index]["score"] += 10 - self.correct_answers
+                            else:
+                                self.ranking[connection_index]["score"] += 1
+                            
+                            object["type"] = "ranking_update"
+                            object["data"] = self.ranking
+                        else:
+                            object["data"] = f"{author}: {object['data']}"
                         
                     message = json.dumps(object).encode(self.default_string_format)
                     message_length = ("0"*(self.message_length_header_length - len(str(len(message)))) + str(len(message))).encode(self.default_string_format)
