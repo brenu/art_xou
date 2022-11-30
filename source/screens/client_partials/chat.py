@@ -2,8 +2,8 @@ import pygame
 import pygame_textinput
 import json
 
-DEFAULT_STRING_FORMAT = "utf-8"
-MESSAGE_LENGTH_HEADER_LENGTH = 128
+from source.core.game_consts import GameConsts
+game_consts = GameConsts()
 
 class Chat:
     def __init__(self, width, height, client, palette):
@@ -66,8 +66,8 @@ class Chat:
         answer = json.dumps({
             "type": "answer",
             "data": answer
-        }).encode(DEFAULT_STRING_FORMAT)
-        answer_length = ("0"*(MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(answer)))) + str(len(answer))).encode(DEFAULT_STRING_FORMAT)
+        }).encode(game_consts.DEFAULT_STRING_FORMAT)
+        answer_length = ("0"*(game_consts.MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(answer)))) + str(len(answer))).encode(game_consts.DEFAULT_STRING_FORMAT)
 
         self.client.connected_client.sendall(answer_length)
         self.client.connected_client.sendall(answer)

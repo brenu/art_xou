@@ -4,8 +4,9 @@ import socket
 import random
 import datetime
 import time
+from game_consts import GameConsts
 
-PORT = 65432
+game_consts = GameConsts()
 
 class Server:
     def __init__(self, game_client):
@@ -14,10 +15,7 @@ class Server:
     
         self.host = temporary_socket.getsockname()[0]
         self.match_name = "blablabla"
-        self.port = PORT
-        self.server_address = (self.host, self.port)
-        self.default_string_format = "utf-8"
-        self.message_length_header_length = 128
+        self.server_address = (self.host, game_consts.DEFAULT_PORT)
         
         self.possible_words = open("source/core/words.txt", "r", encoding="utf-8").read().splitlines()
         self.clients = []
@@ -56,12 +54,12 @@ class Server:
                     "data": {}
                 }
 
-                message = json.dumps(new_round_message).encode(self.default_string_format)
-                message_length = ("0"*(self.message_length_header_length - len(str(len(message)))) + str(len(message))).encode(self.default_string_format)
+                message = json.dumps(new_round_message).encode(game_consts.DEFAULT_STRING_FORMAT)
+                message_length = ("0"*(game_consts.MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(message)))) + str(len(message))).encode(game_consts.DEFAULT_STRING_FORMAT)
 
                 new_round_message["data"]["word"] = self.word_of_the_round
-                special_message = json.dumps(new_round_message).encode(self.default_string_format)
-                special_message_length = ("0"*(self.message_length_header_length - len(str(len(special_message)))) + str(len(special_message))).encode(self.default_string_format)
+                special_message = json.dumps(new_round_message).encode(game_consts.DEFAULT_STRING_FORMAT)
+                special_message_length = ("0"*(game_consts.MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(special_message)))) + str(len(special_message))).encode(game_consts.DEFAULT_STRING_FORMAT)
 
                 for index, connection in enumerate(self.clients):
                     if self.client_names[index] == self.drawing_player_name:
@@ -85,11 +83,11 @@ class Server:
     def handle_new_client(self, connection: socket.socket, address):
         while True:
             try:
-                initial_header = connection.recv(self.message_length_header_length).decode(self.default_string_format)
+                initial_header = connection.recv(game_consts.MESSAGE_LENGTH_HEADER_LENGTH).decode(game_consts.DEFAULT_STRING_FORMAT)
             
                 if initial_header:
                     message_length = int(initial_header)
-                    message = connection.recv(message_length).decode(self.default_string_format)
+                    message = connection.recv(message_length).decode(game_consts.DEFAULT_STRING_FORMAT)
 
                     object = json.loads(message)
 
@@ -121,8 +119,8 @@ class Server:
                         else:
                             object["data"] = f"{author}: {object['data']}"
                         
-                    message = json.dumps(object).encode(self.default_string_format)
-                    message_length = ("0"*(self.message_length_header_length - len(str(len(message)))) + str(len(message))).encode(self.default_string_format)
+                    message = json.dumps(object).encode(game_consts.DEFAULT_STRING_FORMAT)
+                    message_length = ("0"*(game_consts.MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(message)))) + str(len(message))).encode(game_consts.DEFAULT_STRING_FORMAT)
 
                     if object["type"] == "match_info" or object["type"] == "join":
                         connection.sendall(message_length)

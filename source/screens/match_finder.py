@@ -1,15 +1,12 @@
-from concurrent.futures import thread
 import json
 import socket
 import sys
 import pygame
-import scapy.all as scapy
 import threading
-
 import netifaces
 
-DEFAULT_STRING_FORMAT = "utf-8"
-MESSAGE_LENGTH_HEADER_LENGTH = 128
+from source.core.game_consts import GameConsts
+game_consts = GameConsts()
 
 class MatchFinder:
     def __init__(self, screen, palette):
@@ -106,17 +103,17 @@ class MatchFinder:
         connection.settimeout(None)
         match_info_request = json.dumps({
             "type": "match_info"
-        }).encode(DEFAULT_STRING_FORMAT)
-        match_info_request_length = ("0"*(MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(match_info_request)))) + str(len(match_info_request))).encode(DEFAULT_STRING_FORMAT)
+        }).encode(game_consts.DEFAULT_STRING_FORMAT)
+        match_info_request_length = ("0"*(game_consts.MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(match_info_request)))) + str(len(match_info_request))).encode(game_consts.DEFAULT_STRING_FORMAT)
 
         connection.sendall(match_info_request_length)
         connection.sendall(match_info_request)
-        initial_packet = connection.recv(MESSAGE_LENGTH_HEADER_LENGTH).decode(DEFAULT_STRING_FORMAT)
+        initial_packet = connection.recv(game_consts.MESSAGE_LENGTH_HEADER_LENGTH).decode(game_consts.DEFAULT_STRING_FORMAT)
 
         if initial_packet:
             incoming_message_length = int(initial_packet)
 
-            message = connection.recv(incoming_message_length).decode(DEFAULT_STRING_FORMAT)
+            message = connection.recv(incoming_message_length).decode(game_consts.DEFAULT_STRING_FORMAT)
             object = json.loads(message)
 
             if object.get("data",{}).get("name"):

@@ -1,9 +1,5 @@
-import json
 import pygame
 from pygame import gfxdraw
-
-DEFAULT_STRING_FORMAT = "utf-8"
-MESSAGE_LENGTH_HEADER_LENGTH = 128
 
 class Board:
     def __init__(self, width, height, client, palette):

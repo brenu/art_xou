@@ -56,6 +56,7 @@ def main():
             elif mode == "game" and client.navigate:
                 ran = False
                 mode = client.navigate
+                client = None
             elif mode == "match_finder" and match_finder.navigate:
                 ran = False
                 mode = match_finder.navigate

@@ -10,8 +10,8 @@ from source.screens.client_partials.chat import Chat
 from source.screens.client_partials.ranking import Ranking
 from source.core.server import Server
 
-DEFAULT_STRING_FORMAT = "utf-8"
-MESSAGE_LENGTH_HEADER_LENGTH = 128
+from source.core.game_consts import GameConsts
+game_consts = GameConsts()
 
 class Client:
     def __init__(self, screen, palette, name, game_address, server=False):
@@ -63,12 +63,12 @@ class Client:
         self.join_match()
         while True:
             try:
-                initial_packet = self.connected_client.recv(MESSAGE_LENGTH_HEADER_LENGTH).decode(DEFAULT_STRING_FORMAT)
+                initial_packet = self.connected_client.recv(game_consts.MESSAGE_LENGTH_HEADER_LENGTH).decode(game_consts.DEFAULT_STRING_FORMAT)
 
                 if initial_packet:
                     incoming_message_length = int(initial_packet)
 
-                    message = self.connected_client.recv(incoming_message_length).decode(DEFAULT_STRING_FORMAT)
+                    message = self.connected_client.recv(incoming_message_length).decode(game_consts.DEFAULT_STRING_FORMAT)
                     object = json.loads(message)
                     
                     if object["type"] == "answer":
@@ -177,8 +177,8 @@ class Client:
                 "x": x,
                 "y": y
             }
-        }).encode(DEFAULT_STRING_FORMAT)
-        update_length = ("0"*(MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(update)))) + str(len(update))).encode(DEFAULT_STRING_FORMAT)
+        }).encode(game_consts.DEFAULT_STRING_FORMAT)
+        update_length = ("0"*(game_consts.MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(update)))) + str(len(update))).encode(game_consts.DEFAULT_STRING_FORMAT)
 
         self.connected_client.sendall(update_length)
         self.connected_client.sendall(update)
@@ -189,18 +189,18 @@ class Client:
             "data": {
                 "name": self.name
             }
-        }).encode(DEFAULT_STRING_FORMAT)
-        request_length = ("0"*(MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(request_body)))) + str(len(request_body))).encode(DEFAULT_STRING_FORMAT)
+        }).encode(game_consts.DEFAULT_STRING_FORMAT)
+        request_length = ("0"*(game_consts.MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(request_body)))) + str(len(request_body))).encode(game_consts.DEFAULT_STRING_FORMAT)
 
         self.connected_client.sendall(request_length)
         self.connected_client.sendall(request_body)
 
-        initial_packet = self.connected_client.recv(MESSAGE_LENGTH_HEADER_LENGTH).decode(DEFAULT_STRING_FORMAT)
+        initial_packet = self.connected_client.recv(game_consts.MESSAGE_LENGTH_HEADER_LENGTH).decode(game_consts.DEFAULT_STRING_FORMAT)
 
         if initial_packet:
             incoming_message_length = int(initial_packet)
 
-            message = self.connected_client.recv(incoming_message_length).decode(DEFAULT_STRING_FORMAT)
+            message = self.connected_client.recv(incoming_message_length).decode(game_consts.DEFAULT_STRING_FORMAT)
             object = json.loads(message)
 
             if not object["data"].get("success"):
