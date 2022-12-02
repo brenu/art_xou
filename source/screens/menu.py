@@ -43,7 +43,7 @@ class Menu():
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.has_clicked_create_button(x, y):
-                        self.navigate = "game"
+                        self.navigate = "match_creator"
                         self.server = True
                     elif self.has_clicked_join_button(x, y):
                         self.navigate = "match_finder"

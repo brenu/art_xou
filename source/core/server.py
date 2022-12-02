@@ -9,19 +9,20 @@ from source.core.game_consts import GameConsts
 game_consts = GameConsts()
 
 class Server:
-    def __init__(self, game_client):
+    def __init__(self, game_client, match_name):
         temporary_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         temporary_socket.connect(("8.8.8.8", 80))
     
         self.host = temporary_socket.getsockname()[0]
-        self.match_name = "blablabla"
-        self.server_address = (self.host, game_consts.DEFAULT_PORT)
+        self.match_name = match_name
+        self.port = game_consts.DEFAULT_PORT
+        self.server_address = (self.host, self.port)
         
         self.possible_words = open("source/core/words.txt", "r", encoding="utf-8").read().splitlines()
         self.clients = []
         self.client_names = []
         self.ranking = []
-        self.drawing_player_name = "DonoDaBola"
+        self.drawing_player_name = game_client.name
         self.word_of_the_round = self.possible_words[random.randint(0, len(self.possible_words))]
         self.round_start_time = datetime.datetime.now()
         self.correct_answers = 0

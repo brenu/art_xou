@@ -3,6 +3,7 @@ import pygame
 from source.screens.client import Client
 from source.screens.match_finder import MatchFinder
 from source.screens.menu import Menu
+from source.screens.match_creator import MatchCreator
 import gc
 
 def main():
@@ -31,6 +32,7 @@ def main():
     client = None
     menu = None
     match_finder = None
+    match_creator = None
 
     while True:
         if not ran:
@@ -39,16 +41,26 @@ def main():
                 menu = Menu(screen, palette)
                 menu.run()
             elif mode == "game":
+
                 client = Client(
                     screen,
-                    palette, "DonoDaBola" if menu.server else "Fulano",
+                    palette, 
+                    match_creator.player_name_input.value if match_creator else "Fulano",
                     match_finder.selected_match["address"].split(":") if match_finder else ("localhost", 65432),
-                    menu.server
+                    menu.server,
+                    match_creator.match_name_input.value if match_creator else "",
                 )
+
+                match_creator = None
+                match_finder = None
+
                 client.run()
             elif mode == "match_finder":
                 match_finder = MatchFinder(screen, palette)
                 match_finder.run()
+            elif mode == "match_creator":
+                match_creator = MatchCreator(screen, palette)
+                match_creator.run()
         else:
             if mode == "menu" and menu.navigate:
                 ran = False
@@ -60,7 +72,9 @@ def main():
             elif mode == "match_finder" and match_finder.navigate:
                 ran = False
                 mode = match_finder.navigate
-                match_finder = None
+            elif mode == "match_creator" and match_creator.navigate:
+                ran = False
+                mode = match_creator.navigate
 
 
 if __name__ == "__main__":
