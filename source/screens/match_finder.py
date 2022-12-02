@@ -2,8 +2,10 @@ import json
 import socket
 import sys
 import pygame
+import pygame_textinput
 import threading
 import netifaces
+
 
 from source.core.game_consts import GameConsts
 game_consts = GameConsts()
@@ -22,27 +24,45 @@ class MatchFinder:
         self.matches = []
         self.selected_match = None
 
+        player_name_manager = pygame_textinput.TextInputManager(validator = lambda input: len(input) <= 15)
+        self.player_name_input = pygame_textinput.TextInputVisualizer(manager=player_name_manager)
+        self.player_name_input.font_color = palette["white"]
+        self.player_name_input.cursor_color = palette["white"]
+        self.player_name_input.font_object = self.font
+        self.player_name_input.cursor_width = 2
+        self.player_name_rect = pygame.Rect(0, 0, 300, 50)
+        self.player_name_rect.center = (1280/2, 720*0.15)
+
         self.draw_base_components()
 
     def draw_base_components(self):
+        text = self.font.render("Insira seu nome", True, self.palette["white"])
+        pygame.draw.rect(self.screen, self.palette["navy_blue"], self.player_name_rect, 0, 0)
+        self.screen.blit(text, text.get_rect(left=self.player_name_rect.left, bottom=self.player_name_rect.top - 10))
+        self.screen.blit(self.player_name_input.surface, (self.player_name_rect.left+4, self.player_name_rect.top+10))
+
         create_text = self.font.render("Partidas Encontradas", True, self.palette["white"])
         create_text_rect = create_text.get_rect()
         create_text_rect.center = (1280/2, 200)
 
         self.screen.blit(create_text, create_text_rect)
 
+        self.draw_available_matches()
         self.draw_screen()
 
     def run(self):      
-        self.screen.fill(self.palette["blue"])
-        self.draw_base_components()
         self.get_available_matches()
         while True:
             if self.navigate:
                 return
 
+            self.screen.fill(self.palette["blue"])
+            self.draw_base_components()
+
             ( x, y ) = pygame.mouse.get_pos()
-            for event in pygame.event.get():
+            events = pygame.event.get()
+            self.player_name_input.update(events)
+            for event in events:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.has_clicked_on_match(x, y):
                         self.navigate = "game"
@@ -123,8 +143,6 @@ class MatchFinder:
                     "address": address,
                     "name": object.get("data",{}).get("name")
                 })
-
-                self.draw_available_matches()
 
     def stop(self):
         pass

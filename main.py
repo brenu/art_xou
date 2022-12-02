@@ -45,7 +45,7 @@ def main():
                 client = Client(
                     screen,
                     palette, 
-                    match_creator.player_name_input.value if match_creator else "Fulano",
+                    match_creator.player_name_input.value if match_creator else match_finder.player_name_input.value,
                     match_finder.selected_match["address"].split(":") if match_finder else ("localhost", 65432),
                     menu.server,
                     match_creator.match_name_input.value if match_creator else "",
@@ -56,9 +56,11 @@ def main():
 
                 client.run()
             elif mode == "match_finder":
+                match_creator = None
                 match_finder = MatchFinder(screen, palette)
                 match_finder.run()
             elif mode == "match_creator":
+                match_finder = None
                 match_creator = MatchCreator(screen, palette)
                 match_creator.run()
         else:
