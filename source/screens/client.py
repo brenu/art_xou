@@ -8,6 +8,7 @@ import socket
 from source.screens.client_partials.board import Board
 from source.screens.client_partials.chat import Chat
 from source.screens.client_partials.ranking import Ranking
+from source.screens.client_partials.word_container import WordContainer
 from source.core.server import Server
 
 from source.core.game_consts import GameConsts
@@ -41,6 +42,7 @@ class Client:
 
         self.ranking = Ranking(188, 400, self, self.palette)
         self.chat = Chat(435, 696, self, self.palette)
+        self.word_container = WordContainer(600,225, self, self.palette)
 
         self.server = Server(self, match_name) if server == True else None
         
@@ -76,9 +78,11 @@ class Client:
                     elif object["type"] == "board_update":
                         pygame.draw.circle(self.screen, object["data"]["color"], ( object["data"]["x"], object["data"]["y"] ), object["data"]["radius"] )
                     elif object["type"] == "new_round":
+                        self.word_container.clear()
                         if object["data"].get("word"):
                             self.board.clear(True)
                             self.word_to_draw = object["data"].get("word")
+                            self.word_container.update(self.word_to_draw)
                         else:
                             self.board.clear(False)
             except:
@@ -92,6 +96,10 @@ class Client:
         self.ranking.clear()
         self.chat.clear()
         self.board.clear(False)
+        self.word_container.clear()
+
+        if self.server and self.server.drawing_player_name == self.name:
+            self.word_container.update(self.server.word_of_the_round)
 
     def close_server_sockets(self):
         self.connected_client.shutdown(socket.SHUT_RDWR)
