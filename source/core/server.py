@@ -27,6 +27,7 @@ class Server:
         self.word_of_the_round = self.possible_words[random.randint(0, len(self.possible_words))]
         self.round_start_time = datetime.datetime.now()
         self.correct_answers = []
+        self.board_until_now = []
         self.open = True
 
         self.game_client = game_client
@@ -51,6 +52,7 @@ class Server:
                 self.word_of_the_round = self.possible_words[random.randint(0, len(self.possible_words)-1)]
                 self.drawing_player_name = self.client_names[random.randint(0, len(self.client_names)-1)]
                 self.correct_answers = []
+                self.board_until_now = []
 
                 new_round_message = {
                     "type": "new_round",
@@ -96,25 +98,26 @@ class Server:
 
                     if object["type"] == "match_info":
                         object["data"] = {"name": self.match_name}
+
                     elif object["type"] == "join":
                         if not object["data"]["name"] in self.client_names:
                             self.clients.append(connection)
                             self.client_names.append(object["data"]["name"])
                             self.ranking.append({ "name": object["data"]["name"], "score": 0})
-                            object["data"] = {"success": True}
+                            object["data"] = {"success": True, "board": self.board_until_now}
                         else:
                             object["data"] = {"success": False}
+
                     elif object["type"] == "answer":
                         connection_index = self.clients.index(connection)
                         author = self.client_names[connection_index]
 
                         if author == self.drawing_player_name:
                             continue
+                        if connection in self.correct_answers:
+                            continue
                         
                         if object["data"] == self.word_of_the_round:
-                            if connection in self.correct_answers:
-                                continue
-
                             correct_answers_length = len(self.correct_answers)
                             if correct_answers_length < 10:
                                 self.ranking[connection_index]["score"] += 10 - correct_answers_length
@@ -149,6 +152,9 @@ class Server:
                         for client in self.clients:
                             client.sendall(ProtocolParsing.parse(object))
                     else:
+                        if object["type"] == "board_update":
+                            self.board_until_now.append(object["data"])
+
                         connection_index = self.clients.index(connection)
                         connection_player_name = self.client_names[connection_index]
 

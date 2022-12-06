@@ -25,7 +25,8 @@ class Client:
         self.palette = palette
 
         self.sfx = {
-            "waterdrop": pygame.mixer.Sound('assets/sfx/waterdrop.ogg')
+            "waterdrop": pygame.mixer.Sound('assets/sfx/waterdrop.ogg'),
+            "success": pygame.mixer.Sound('assets/sfx/success.ogg')
         }
 
         self.screen.fill(self.palette["blue"])
@@ -35,6 +36,10 @@ class Client:
         self.pen_color = "black"
         self.pen_previous_color = "black"
         self.mode = "paint"
+
+        self.previous_points = 0
+        self.initial_board = []
+        self.initial_ranking = []
 
         self.word_to_draw = None
                
@@ -87,6 +92,11 @@ class Client:
                         else:
                             self.board.clear(False)
                     elif object["type"] == "ranking_update":
+                        player = list(filter(lambda x: x["name"] == self.name, object["data"]))[0]
+
+                        if player["score"] > self.previous_points:
+                            pygame.mixer.Sound.play(self.sfx["success"])
+
                         self.ranking.clear()
                         self.ranking.update(object["data"])
             except:
@@ -126,6 +136,11 @@ class Client:
         self.screen.fill(self.palette["blue"])
         self.draw_base_components()
         self.ranking.update(self.initial_ranking)
+
+        if self.initial_board:
+            for dot in self.initial_board:
+                    pygame.draw.circle(self.screen, dot["color"], ( dot["x"], dot["y"] ), dot["radius"] )
+
         self.is_running = True
         while True: 
             if self.navigate:
@@ -213,6 +228,8 @@ class Client:
             if not object["data"].get("success"):
                 self.navigate = "menu"
                 self.error = "Oops!"
+            
+            self.initial_board = object["data"].get("board")
 
         initial_packet = self.connected_client.recv(game_consts.MESSAGE_LENGTH_HEADER_LENGTH).decode(game_consts.DEFAULT_STRING_FORMAT)
 
