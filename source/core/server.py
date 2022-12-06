@@ -5,6 +5,7 @@ import random
 import datetime
 import time
 from source.core.game_consts import GameConsts
+from source.core.protocol_parsing import ProtocolParsing
 
 game_consts = GameConsts()
 
@@ -108,42 +109,46 @@ class Server:
 
                         if author == self.drawing_player_name:
                             continue
-
+                        
                         if object["data"] == self.word_of_the_round:
                             if self.correct_answers < 10:
                                 self.ranking[connection_index]["score"] += 10 - self.correct_answers
                             else:
                                 self.ranking[connection_index]["score"] += 1
                             
+                            self.ranking.sort(key=lambda a: a["score"], reverse=True)
                             object["type"] = "ranking_update"
                             object["data"] = self.ranking
                         else:
                             object["data"] = f"{author}: {object['data']}"
-                        
-                    message = json.dumps(object).encode(game_consts.DEFAULT_STRING_FORMAT)
-                    message_length = ("0"*(game_consts.MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(message)))) + str(len(message))).encode(game_consts.DEFAULT_STRING_FORMAT)
 
                     if object["type"] == "match_info" or object["type"] == "join":
-                        connection.sendall(message_length)
-                        connection.sendall(message)
+                        connection.sendall(ProtocolParsing.parse(object))
 
                         if object["data"].get("success") == False:
                             connection.shutdown(socket.SHUT_RDWR)
                             connection.close()
                             break
+                        elif object["type"] == "join":
+                            for client in self.clients:
+                                client.sendall(ProtocolParsing.parse({
+                                    "type": "ranking_update",
+                                    "data": self.ranking
+                                }))
                     elif object["type"] == "answer":
                         for client in self.clients:
                             if client != connection:
-                                client.sendall(message_length)
-                                client.sendall(message)
+                                client.sendall(ProtocolParsing.parse(object))
+                    elif object["type"] == "ranking_update":
+                        for client in self.clients:
+                            client.sendall(ProtocolParsing.parse(object))
                     else:
                         connection_index = self.clients.index(connection)
                         connection_player_name = self.client_names[connection_index]
 
                         if connection_player_name == self.drawing_player_name:
                             for client in self.clients:
-                                client.sendall(message_length)
-                                client.sendall(message)
+                                client.sendall(ProtocolParsing.parse(object))
                 else:
                     break
             except Exception as e:

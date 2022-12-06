@@ -10,6 +10,7 @@ from source.screens.client_partials.chat import Chat
 from source.screens.client_partials.ranking import Ranking
 from source.screens.client_partials.word_container import WordContainer
 from source.core.server import Server
+from source.core.protocol_parsing import ProtocolParsing
 
 from source.core.game_consts import GameConsts
 game_consts = GameConsts()
@@ -54,6 +55,7 @@ class Client:
             else:
                 self.connected_client.connect((game_address[0], 65432))
             
+            self.join_match()
             threading.Thread(target=self.handle_incoming_data).start()
         except Exception as e:
             print(e)
@@ -62,7 +64,6 @@ class Client:
 
 
     def handle_incoming_data(self):
-        self.join_match()
         while True:
             try:
                 initial_packet = self.connected_client.recv(game_consts.MESSAGE_LENGTH_HEADER_LENGTH).decode(game_consts.DEFAULT_STRING_FORMAT)
@@ -85,6 +86,9 @@ class Client:
                             self.word_container.update(self.word_to_draw)
                         else:
                             self.board.clear(False)
+                    elif object["type"] == "ranking_update":
+                        self.ranking.clear()
+                        self.ranking.update(object["data"])
             except:
                 return
                 
@@ -99,7 +103,9 @@ class Client:
         self.word_container.clear()
 
         if self.server and self.server.drawing_player_name == self.name:
+            self.board.clear(True)
             self.word_container.update(self.server.word_of_the_round)
+            self.ranking.update(self.server.ranking)
 
     def close_server_sockets(self):
         self.connected_client.shutdown(socket.SHUT_RDWR)
@@ -177,7 +183,7 @@ class Client:
         pygame.display.update()
 
     def send_board_update(self, color, radius, x, y):
-        update = json.dumps({
+        self.connected_client.sendall(ProtocolParsing.parse({
             "type": "board_update",
             "data": {
                 "color": color,
@@ -185,23 +191,15 @@ class Client:
                 "x": x,
                 "y": y
             }
-        }).encode(game_consts.DEFAULT_STRING_FORMAT)
-        update_length = ("0"*(game_consts.MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(update)))) + str(len(update))).encode(game_consts.DEFAULT_STRING_FORMAT)
-
-        self.connected_client.sendall(update_length)
-        self.connected_client.sendall(update)
+        }))
 
     def join_match(self):
-        request_body = json.dumps({
+        self.connected_client.sendall(ProtocolParsing.parse({
             "type": "join",
             "data": {
                 "name": self.name
             }
-        }).encode(game_consts.DEFAULT_STRING_FORMAT)
-        request_length = ("0"*(game_consts.MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(request_body)))) + str(len(request_body))).encode(game_consts.DEFAULT_STRING_FORMAT)
-
-        self.connected_client.sendall(request_length)
-        self.connected_client.sendall(request_body)
+        }))
 
         initial_packet = self.connected_client.recv(game_consts.MESSAGE_LENGTH_HEADER_LENGTH).decode(game_consts.DEFAULT_STRING_FORMAT)
 
