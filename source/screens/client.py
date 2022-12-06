@@ -55,7 +55,7 @@ class Client:
             else:
                 self.connected_client.connect((game_address[0], 65432))
             
-            self.join_match()
+            self.initial_ranking = self.join_match()
             threading.Thread(target=self.handle_incoming_data).start()
         except Exception as e:
             print(e)
@@ -125,6 +125,7 @@ class Client:
     def run(self):
         self.screen.fill(self.palette["blue"])
         self.draw_base_components()
+        self.ranking.update(self.initial_ranking)
         self.is_running = True
         while True: 
             if self.navigate:
@@ -212,3 +213,14 @@ class Client:
             if not object["data"].get("success"):
                 self.navigate = "menu"
                 self.error = "Oops!"
+
+        initial_packet = self.connected_client.recv(game_consts.MESSAGE_LENGTH_HEADER_LENGTH).decode(game_consts.DEFAULT_STRING_FORMAT)
+
+        if initial_packet:
+            incoming_message_length = int(initial_packet)
+
+            message = self.connected_client.recv(incoming_message_length).decode(game_consts.DEFAULT_STRING_FORMAT)
+            object = json.loads(message)
+
+            if object["type"] == "ranking_update":
+                return object["data"]

@@ -22,6 +22,9 @@ class Ranking:
         pygame.draw.rect(self.subsurface, self.palette["navy_blue"], self.background_rect,0,5)
 
     def update(self, data):
+        data = list(data)
+        data.sort(key=lambda a: a["score"], reverse=True)
+
         for index, player in enumerate(data):
             text = self.font.render(f"{index+1}º{player['name']}:{player['score']}", True, self.palette["white"])
             

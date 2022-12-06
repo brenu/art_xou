@@ -26,7 +26,7 @@ class Server:
         self.drawing_player_name = game_client.name
         self.word_of_the_round = self.possible_words[random.randint(0, len(self.possible_words))]
         self.round_start_time = datetime.datetime.now()
-        self.correct_answers = 0
+        self.correct_answers = []
         self.open = True
 
         self.game_client = game_client
@@ -50,6 +50,7 @@ class Server:
                 self.round_start_time = datetime.datetime.now()
                 self.word_of_the_round = self.possible_words[random.randint(0, len(self.possible_words)-1)]
                 self.drawing_player_name = self.client_names[random.randint(0, len(self.client_names)-1)]
+                self.correct_answers = []
 
                 new_round_message = {
                     "type": "new_round",
@@ -111,12 +112,17 @@ class Server:
                             continue
                         
                         if object["data"] == self.word_of_the_round:
-                            if self.correct_answers < 10:
-                                self.ranking[connection_index]["score"] += 10 - self.correct_answers
+                            if connection in self.correct_answers:
+                                continue
+
+                            correct_answers_length = len(self.correct_answers)
+                            if correct_answers_length < 10:
+                                self.ranking[connection_index]["score"] += 10 - correct_answers_length
                             else:
                                 self.ranking[connection_index]["score"] += 1
                             
-                            self.ranking.sort(key=lambda a: a["score"], reverse=True)
+
+                            self.correct_answers.append(connection)
                             object["type"] = "ranking_update"
                             object["data"] = self.ranking
                         else:
