@@ -111,6 +111,7 @@ class Server:
                     elif object["type"] == "answer":
                         connection_index = self.clients.index(connection)
                         author = self.client_names[connection_index]
+                        drawing_player_index = self.client_names.index(self.drawing_player_name)
 
                         if author == self.drawing_player_name:
                             continue
@@ -121,8 +122,10 @@ class Server:
                             correct_answers_length = len(self.correct_answers)
                             if correct_answers_length < 10:
                                 self.ranking[connection_index]["score"] += 10 - correct_answers_length
+                                self.ranking[drawing_player_index]["score"] += 10 - correct_answers_length
                             else:
                                 self.ranking[connection_index]["score"] += 1
+                                self.ranking[drawing_player_index]["score"] += 1
                             
 
                             self.correct_answers.append(connection)

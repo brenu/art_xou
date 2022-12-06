@@ -97,6 +97,8 @@ class Client:
                         if player["score"] > self.previous_points:
                             pygame.mixer.Sound.play(self.sfx["success"])
 
+                        self.previous_points = player["score"]
+
                         self.ranking.clear()
                         self.ranking.update(object["data"])
             except:
