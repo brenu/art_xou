@@ -26,7 +26,8 @@ class Client:
 
         self.sfx = {
             "waterdrop": pygame.mixer.Sound('assets/sfx/waterdrop.ogg'),
-            "success": pygame.mixer.Sound('assets/sfx/success.ogg')
+            "success": pygame.mixer.Sound('assets/sfx/success.ogg'),
+            "next_word": pygame.mixer.Sound('assets/sfx/next_word.ogg')
         }
 
         self.screen.fill(self.palette["blue"])
@@ -84,6 +85,7 @@ class Client:
                     elif object["type"] == "board_update":
                         pygame.draw.circle(self.screen, object["data"]["color"], ( object["data"]["x"], object["data"]["y"] ), object["data"]["radius"] )
                     elif object["type"] == "new_round":
+                        pygame.mixer.Sound.play(self.sfx["next_word"])
                         self.word_container.clear()
                         if object["data"].get("word"):
                             self.board.clear(True)
