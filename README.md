@@ -61,6 +61,7 @@ O campo `type` possui como válidos os valores abaixo:
 * `answer` - é uma possível resposta para o desenho que está sendo feito. Essa mensagem somente é enviada por clientes, e não pelo servidor. Se o servidor identificar que a palavra está certa, ele retorna um type ranking_update com o novo ranking atualizado. Caso contrário, ele retorna o mesmo type para todos os jogadores poderem ver que aquela palavra não é uma resposta correta.
 * `board_update` - é uma atualização do quadro de desenho. Essa mensagem somente é enviada pelo cliente que foi selecionado para desenhar no turno. Essa mensagem é repassada para todos os outros jogadores, com o mesmo type, de modo a permitir que o desenho chegue à tela de cada um.
 * `ranking_update` - representa uma atualização do ranking para ser exibido para os jogadores. Esse valor só é válido quando enviado pelo servidor, e nada irá acontecer se um jogador enviar uma mensagem com esse type.
+* `new_round` - representa o fim da rodada atual, e o início de uma nova. Esse valor só é válido quando enviado pelo servidor, e nada irá acontecer se um jogador enviar uma mensagem com esse type.
 
 O campo `data` tem seu conteúdo bastante variado, a depender do valor de `type`. Seguem, abaixo, alguns exemplos:
 
@@ -128,5 +129,13 @@ O campo `data` tem seu conteúdo bastante variado, a depender do valor de `type`
     {"name": "Erika", "score": 10},
     {"name": "Eu", "score": 10}
   ]
+}
+```
+* `new_round` - o início de uma nova rodada contém somente um objeto vazio, como exemplificado a seguir:
+
+```javascript
+{
+  "type": "new_round",
+  "data": {}
 }
 ```
