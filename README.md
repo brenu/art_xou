@@ -1,10 +1,12 @@
 # :art: Art Xou
 
+![Partida do game em execução](./assets/doc_pictures/doc_logo.png)
+
 Jogo criado como um dos créditos a serem avaliados para a disciplina Rede de Computadores I.
 
 ## :national_park: Ideia Geral
 
-Se trata de um jogo com ideia semelhante ao gartic, em que os jogadores entram em uma sala, e a cada turno um deles é responsável por desenhar, enquanto os outros jogadores tentam acertar o que está sendo desenhado. Na implementação atual, as partidas ocorrem indefinidamente, pois elas não possuem uma regra estabelecida para seu fim.
+Se trata de um jogo com ideia semelhante ao Gartic, em que os jogadores entram em uma sala, e a cada turno um deles é responsável por desenhar, enquanto os outros jogadores tentam acertar o que está sendo desenhado. Na implementação atual, as partidas ocorrem indefinidamente, pois elas não possuem uma regra estabelecida para seu fim.
 
 ## :pencil: Requisitos
 
