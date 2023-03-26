@@ -104,6 +104,8 @@ class Client:
                         self.ranking.clear()
                         self.ranking.update(object["data"])
             except:
+                self.navigate = "menu"
+                self.error = "Houve um problema de conexão com a partida!"
                 return
                 
 
@@ -131,8 +133,11 @@ class Client:
                     client.close()
                 except:
                     continue
-            
-            self.server.server.shutdown(socket.SHUT_RDWR)
+
+            try:
+                self.server.server.shutdown(socket.SHUT_RDWR)
+            except:
+                pass
             self.server.server.close()
             self.server.open = False
 

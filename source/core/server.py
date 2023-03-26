@@ -167,10 +167,14 @@ class Server:
                 else:
                     break
             except Exception as e:
-                print(e)
-                connection.shutdown(socket.SHUT_RDWR)
-                connection.close()
                 break
+
+        try:
+            connection.shutdown(socket.SHUT_RDWR)
+        except:
+            pass
+
+        connection.close()
 
         if connection in self.clients:
             connection.close()
