@@ -12,15 +12,23 @@ Se trata de um jogo com ideia semelhante ao Gartic, em que os jogadores entram e
 
 Para jogar o game, é necessário ter o Python 3 instalado, assim como todos os requisitos presentes no arquivo `requirements.txt`. Além disso, é necessária a biblioteca netifaces, que está sendo utilizada na busca de partidas como um meio de obter o gateway padrão da rede em que o computador está, visto que todas as partidas ocorrem em LAN/WLAN.
 
-Para instalar as dependências, presumindo que você já tem o Python 3 em seu computador, basta executar os seguintes comandos:
+Para instalar as dependências, presumindo que você já tem o Python 3.9 em seu computador, basta executar os seguintes comandos:
 
+### Linux (distribuições baseadas em Debian)
 ```console
 foo@bar:~/art_xou$ sudo apt-get update
 foo@bar:~/art_xou$ sudo apt-get install -y python3-netifaces
 foo@bar:~/art_xou$ pip3 install -r requirements.txt 
 ```
 
-Após isso, para rodar o game, execute:
+### Windows (necessita também do Visual C++, que pode ser baixado [aqui](https://visualstudio.microsoft.com/visual-cpp-build-tools/). Outra opção, para lidar com erros de build do netifaces, é utilizar seus binários pré-compilados que podem ser acessados através [desse projeto](https://www.lfd.uci.edu/~gohlke/pythonlibs/) do Christoph Gohlke, da Universidade da California. Na segunda opção, basta baixar o arquivo .whl e clicar duas vezes no mesmo, não sendo mais necessário instalar o netifaces pelo pip)
+
+```powershell
+PS C:\Users\you\art_xou> pip3 install netifaces
+PS C:\Users\you\art_xou> pip3 install -r requirements.txt
+```
+
+Após isso, para rodar o game, execute (independente do sistema operacional):
 
 ```console
 foo@bar:~/art_xou$ python3 main.py
