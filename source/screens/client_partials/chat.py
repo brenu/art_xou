@@ -37,22 +37,26 @@ class Chat:
         self.clear()
         self.chat_input.update(event)
 
-        for item in event:
-            if item.unicode == "\r":
-                self.send_answer(self.chat_input.value)
-                self.chat_input.value = ""
+        try:
+            for item in event:
+                if item.unicode == "\r":
+                    self.send_answer(self.chat_input.value)
+                    self.chat_input.value = ""
 
-        for index, message in enumerate(self.messages):
-            font = pygame.font.Font("assets/fonts/IBMPlexMono-Regular.ttf", 16)
-            text = font.render(message, True, self.palette["white"])
-            
-            text_rectangle = text.get_rect()
-            text_rectangle.x = 20
-            text_rectangle.y = 600 - (index*30)
+            for index, message in enumerate(self.messages):
+                font = pygame.font.Font("assets/fonts/IBMPlexMono-Regular.ttf", 16)
+                text = font.render(message, True, self.palette["white"])
+                
+                text_rectangle = text.get_rect()
+                text_rectangle.x = 20
+                text_rectangle.y = 600 - (index*30)
 
-            self.subsurface.blit(text, text_rectangle)
+                self.subsurface.blit(text, text_rectangle)
 
-        self.subsurface.blit(self.chat_input.surface, (20, 650))
+            self.subsurface.blit(self.chat_input.surface, (20, 650))
+        except:
+            self.client.navigate = "menu"
+            self.client.error = "Não foi possível se conectar ao servidor"
 
     def update_messages_list(self, new_message):
         self.messages.insert(0, new_message)
