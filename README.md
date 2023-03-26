@@ -21,7 +21,7 @@ foo@bar:~/art_xou$ sudo apt-get install -y python3-netifaces
 foo@bar:~/art_xou$ pip3 install -r requirements.txt 
 ```
 
-### Windows (necessita também do Visual C++, que pode ser baixado [aqui](https://learn.microsoft.com/pt-br/cpp/windows/latest-supported-vc-redist?view=msvc-170))
+### Windows (necessita também do Visual C++, que pode ser baixado [aqui](https://visualstudio.microsoft.com/visual-cpp-build-tools/). Outra opção, para lidar com erros de build do netifaces, é utilizar seus binários pré-compilados que podem ser acessados através [desse projeto](https://www.lfd.uci.edu/~gohlke/pythonlibs/) do Christoph Gohlke, da Universidade da California. Na segunda opção, basta baixar o arquivo .whl e clicar duas vezes no mesmo, não sendo mais necessário instalar o netifaces pelo pip)
 
 ```powershell
 PS C:\Users\you\art_xou> pip3 install netifaces
