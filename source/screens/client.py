@@ -16,19 +16,14 @@ from source.core.game_consts import GameConsts
 game_consts = GameConsts()
 
 class Client:
-    def __init__(self, screen, palette, name, game_address, server=False, match_name=""):
+    def __init__(self, screen, palette, name, game_address, music_player, server=False, match_name=""):
         self.screen = screen
         self.navigate = None
         self.name = name
+        self.music_player = music_player
 
         self.default_padding = 14
         self.palette = palette
-
-        self.sfx = {
-            "waterdrop": pygame.mixer.Sound('assets/sfx/waterdrop.ogg'),
-            "success": pygame.mixer.Sound('assets/sfx/success.ogg'),
-            "next_word": pygame.mixer.Sound('assets/sfx/next_word.ogg')
-        }
 
         self.screen.fill(self.palette["blue"])
         self.font = pygame.font.SysFont("arial", 24)
@@ -85,7 +80,7 @@ class Client:
                     elif object["type"] == "board_update":
                         pygame.draw.circle(self.screen, object["data"]["color"], ( object["data"]["x"], object["data"]["y"] ), object["data"]["radius"] )
                     elif object["type"] == "new_round":
-                        pygame.mixer.Sound.play(self.sfx["next_word"])
+                        self.music_player.play_sound_effect("next_word")
                         self.word_container.clear()
                         if object["data"].get("word"):
                             self.board.clear(True)
@@ -97,7 +92,7 @@ class Client:
                         player = list(filter(lambda x: x["name"] == self.name, object["data"]))[0]
 
                         if player["score"] > self.previous_points:
-                            pygame.mixer.Sound.play(self.sfx["success"])
+                            self.music_player.play_sound_effect("success")
 
                         self.previous_points = player["score"]
 
@@ -165,13 +160,13 @@ class Client:
                         possible_new_color = self.board.is_color_being_changed(x, y)
 
                         if possible_new_color and self.mode == "paint":
-                            pygame.mixer.Sound.play(self.sfx["waterdrop"])
+                            self.music_player.play_sound_effect("waterdrop")
                             self.pen_color = possible_new_color
                         elif self.board.is_brush_clicked(x, y):
                             self.mode = "paint"
                             self.pen_color = self.pen_previous_color
                         elif self.board.is_eraser_clicked(x, y):
-                            pygame.mixer.Sound.play(self.sfx["waterdrop"])
+                            self.music_player.play_sound_effect("waterdrop")
                             self.mode = "erase"
                             self.pen_previous_color = self.pen_color if self.pen_color != "white" else self.pen_previous_color
                             self.pen_color = "white"

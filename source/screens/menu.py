@@ -3,10 +3,11 @@ import pygame
 
 
 class Menu():
-    def __init__(self, screen, palette):
+    def __init__(self, screen, palette, music_player):
         self.screen = screen
         self.palette = palette
         self.server = False
+        self.music_player = music_player
 
         self.screen.fill(self.palette["blue"])
         self.font = pygame.font.Font("assets/fonts/IBMPlexMono-Regular.ttf", 20)
@@ -43,9 +44,11 @@ class Menu():
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.has_clicked_create_button(x, y):
+                        self.music_player.play_sound_effect("button_click")
                         self.navigate = "match_creator"
                         self.server = True
                     elif self.has_clicked_join_button(x, y):
+                        self.music_player.play_sound_effect("button_click")
                         self.navigate = "match_finder"
                 elif event.type == pygame.QUIT:
                     pygame.quit()

@@ -11,10 +11,11 @@ from source.core.game_consts import GameConsts
 game_consts = GameConsts()
 
 class MatchFinder:
-    def __init__(self, screen, palette):
+    def __init__(self, screen, palette, music_player):
         self.navigate = None
         self.screen = screen
         self.palette = palette
+        self.music_player = music_player
 
         self.screen.fill(self.palette["blue"])
         self.font = pygame.font.Font("assets/fonts/IBMPlexMono-Regular.ttf", 20)
@@ -76,6 +77,7 @@ class MatchFinder:
     def has_clicked_on_match(self, x, y):
         for index, match in enumerate(self.matches):
             if match["button"].collidepoint(x, y):
+                self.music_player.play_sound_effect("button_click")
                 self.selected_match = self.matches[index]
                 return True
 

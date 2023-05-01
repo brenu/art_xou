@@ -3,10 +3,11 @@ import pygame_textinput
 import sys
 
 class MatchCreator:
-    def __init__(self, screen, palette):
+    def __init__(self, screen, palette, music_player):
         self.screen = screen
         self.palette = palette    
         self.navigate = None
+        self.music_player = music_player
 
         self.font = pygame.font.Font("assets/fonts/IBMPlexMono-Regular.ttf", 20)
         self.title_font = pygame.font.Font("assets/fonts/IBMPlexMono-Regular.ttf", 36)
@@ -70,6 +71,7 @@ class MatchCreator:
 
     def check_submit(self, x, y):
         if self.create_button.collidepoint(x, y):
+            self.music_player.play_sound_effect("button_click")
             self.navigate = "game"
 
     def draw_base_components(self):

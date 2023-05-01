@@ -149,3 +149,12 @@ O campo `data` tem seu conteúdo bastante variado, a depender do valor de `type`
   "data": {}
 }
 ```
+
+## :pray: Créditos
+
+As músicas e efeitos sonoros utilizados no Art Xou vieram dos seguintes autores/lugares:
+
+
+* [Audio Hero](https://www.zapsplat.com/author/audio-hero/)
+* [ZapSplat](https://www.zapsplat.com/author/zapsplat/)
+* [freesound](https://freesound.org/)

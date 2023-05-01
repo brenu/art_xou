@@ -12,7 +12,7 @@ game_consts = GameConsts()
 class Server:
     def __init__(self, game_client, match_name):
         temporary_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        temporary_socket.connect(("8.8.8.8", 80))
+        temporary_socket.connect(("8.8.8.8", 80)) # The whole idea here is to just create a socket and get our local IP. It doesn't really have to connect
     
         self.host = temporary_socket.getsockname()[0]
         self.match_name = match_name

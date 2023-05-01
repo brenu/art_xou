@@ -1,16 +1,18 @@
-import threading
 import pygame
 from source.screens.client import Client
 from source.screens.match_finder import MatchFinder
 from source.screens.menu import Menu
 from source.screens.match_creator import MatchCreator
-import gc
+from source.core.music_player import MusicPlayer
 
 def main():
     pygame.mixer.init()
     pygame.init()
     screen = pygame.display.set_mode((1280, 720))
     pygame.display.set_caption("Art Xou")
+
+    music_player = MusicPlayer()
+    music_player.play_track("main_theme")
 
     palette = {
         "blue": (30,129,176),
@@ -38,7 +40,7 @@ def main():
         if not ran:
             ran = True
             if mode == "menu":
-                menu = Menu(screen, palette)
+                menu = Menu(screen, palette, music_player)
                 menu.run()
             elif mode == "game":
 
@@ -47,8 +49,9 @@ def main():
                     palette, 
                     match_creator.player_name_input.value if match_creator else match_finder.player_name_input.value,
                     match_finder.selected_match["address"].split(":") if match_finder else ("localhost", 65432),
+                    music_player,
                     menu.server,
-                    match_creator.match_name_input.value if match_creator else "",
+                    match_creator.match_name_input.value if match_creator else ""
                 )
 
                 match_creator = None
@@ -57,11 +60,11 @@ def main():
                 client.run()
             elif mode == "match_finder":
                 match_creator = None
-                match_finder = MatchFinder(screen, palette)
+                match_finder = MatchFinder(screen, palette, music_player)
                 match_finder.run()
             elif mode == "match_creator":
                 match_finder = None
-                match_creator = MatchCreator(screen, palette)
+                match_creator = MatchCreator(screen, palette, music_player)
                 match_creator.run()
         else:
             if mode == "menu" and menu.navigate:
