@@ -98,6 +98,8 @@ class Client:
 
                         self.ranking.clear()
                         self.ranking.update(object["data"])
+                    elif object["type"] == "match_end":
+                        pass # We're not doing anything yet, but the idea is to navigate to another screen with the top 3
             except:
                 self.navigate = "menu"
                 self.error = "Houve um problema de conexão com a partida!"

@@ -28,6 +28,7 @@ class Server:
         self.round_start_time = datetime.datetime.now()
         self.correct_answers = []
         self.board_until_now = []
+        self.gave_hints = 0
         self.open = True
 
         self.game_client = game_client
@@ -47,30 +48,48 @@ class Server:
             time.sleep(0.1)
             if self.open == False:
                 return
-            if datetime.datetime.now() >= self.round_start_time + datetime.timedelta(minutes=2):
+            if (datetime.datetime.now() >= self.round_start_time + datetime.timedelta(minutes=2)) or (len(self.clients) > 1 and len(self.correct_answers) == len(self.clients)-1):
                 self.round_start_time = datetime.datetime.now()
                 self.word_of_the_round = self.possible_words[random.randint(0, len(self.possible_words)-1)]
                 self.drawing_player_name = self.client_names[random.randint(0, len(self.client_names)-1)]
                 self.correct_answers = []
                 self.board_until_now = []
+                self.gave_hints = 0
 
-                new_round_message = {
-                    "type": "new_round",
-                    "data": {}
-                }
+                if self.ranking[0]["score"] < 120:
+                    new_round_message = {
+                        "type": "new_round",
+                        "data": {}
+                    }
 
-                message = json.dumps(new_round_message).encode(game_consts.DEFAULT_STRING_FORMAT)
-                message_length = ("0"*(game_consts.MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(message)))) + str(len(message))).encode(game_consts.DEFAULT_STRING_FORMAT)
+                    message = json.dumps(new_round_message).encode(game_consts.DEFAULT_STRING_FORMAT)
+                    message_length = ("0"*(game_consts.MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(message)))) + str(len(message))).encode(game_consts.DEFAULT_STRING_FORMAT)
 
-                new_round_message["data"]["word"] = self.word_of_the_round
-                special_message = json.dumps(new_round_message).encode(game_consts.DEFAULT_STRING_FORMAT)
-                special_message_length = ("0"*(game_consts.MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(special_message)))) + str(len(special_message))).encode(game_consts.DEFAULT_STRING_FORMAT)
+                    new_round_message["data"]["word"] = self.word_of_the_round
 
-                for index, connection in enumerate(self.clients):
-                    if self.client_names[index] == self.drawing_player_name:
-                        connection.sendall(special_message_length)
-                        connection.sendall(special_message)
-                    else:
+
+                    special_message = json.dumps(new_round_message).encode(game_consts.DEFAULT_STRING_FORMAT)
+                    special_message_length = ("0"*(game_consts.MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(special_message)))) + str(len(special_message))).encode(game_consts.DEFAULT_STRING_FORMAT)
+
+                    for index, connection in enumerate(self.clients):
+                        if self.client_names[index] == self.drawing_player_name:
+                            connection.sendall(special_message_length)
+                            connection.sendall(special_message)
+                        else:
+                            connection.sendall(message_length)
+                            connection.sendall(message)
+                else:
+                    message_data = {
+                        "type": "match_end",
+                        "data": {
+                            "ranking": self.ranking
+                        }
+                    }
+
+                    message = json.dumps(message_data).encode(game_consts.DEFAULT_STRING_FORMAT)
+                    message_length = ("0"*(game_consts.MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(message)))) + str(len(message))).encode(game_consts.DEFAULT_STRING_FORMAT)
+
+                    for index, connection in enumerate(self.clients):
                         connection.sendall(message_length)
                         connection.sendall(message)
 
@@ -120,13 +139,15 @@ class Server:
                         
                         if object["data"] == self.word_of_the_round:
                             correct_answers_length = len(self.correct_answers)
-                            if correct_answers_length < 10:
-                                self.ranking[connection_index]["score"] += 10 - correct_answers_length
-                                self.ranking[drawing_player_index]["score"] += 10 - correct_answers_length
+                            if correct_answers_length + self.gave_hints < 10:
+                                self.ranking[connection_index]["score"] += 10 - correct_answers_length - self.gave_hints
                             else:
                                 self.ranking[connection_index]["score"] += 1
-                                self.ranking[drawing_player_index]["score"] += 1
-                            
+
+                            if correct_answers_length == 0:
+                                self.ranking[drawing_player_index]["score"] += 11 - self.gave_hints
+                            else:
+                                self.ranking[drawing_player_index]["score"] += 2
 
                             self.correct_answers.append(connection)
                             object["type"] = "ranking_update"
