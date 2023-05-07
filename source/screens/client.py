@@ -9,6 +9,7 @@ from source.screens.client_partials.board import Board
 from source.screens.client_partials.chat import Chat
 from source.screens.client_partials.ranking import Ranking
 from source.screens.client_partials.word_container import WordContainer
+from source.screens.client_partials.hints import Hints
 from source.core.server import Server
 from source.core.protocol_parsing import ProtocolParsing
 
@@ -36,6 +37,7 @@ class Client:
         self.previous_points = 0
         self.initial_board = []
         self.initial_ranking = []
+        self.initial_hint = ""
 
         self.word_to_draw = None
                
@@ -45,6 +47,7 @@ class Client:
         self.ranking = Ranking(188, 400, self, self.palette)
         self.chat = Chat(435, 696, self, self.palette)
         self.word_container = WordContainer(600,225, self, self.palette)
+        self.hints = Hints(188, 50, self, self.palette)
 
         self.server = Server(self, match_name) if server == True else None
         
@@ -82,12 +85,15 @@ class Client:
                     elif object["type"] == "new_round":
                         self.music_player.play_sound_effect("next_word")
                         self.word_container.clear()
+                        self.initial_hint = ""
                         if object["data"].get("word"):
                             self.board.clear(True)
+                            self.hints.clear(True)
                             self.word_to_draw = object["data"].get("word")
                             self.word_container.update(self.word_to_draw)
                         else:
                             self.board.clear(False)
+                            self.hints.clear(False)
                     elif object["type"] == "ranking_update":
                         player = list(filter(lambda x: x["name"] == self.name, object["data"]))[0]
 
@@ -98,6 +104,8 @@ class Client:
 
                         self.ranking.clear()
                         self.ranking.update(object["data"])
+                    elif object["type"] == "hint":
+                        self.word_container.update(object["data"])
                     elif object["type"] == "match_end":
                         pass # We're not doing anything yet, but the idea is to navigate to another screen with the top 3
             except:
@@ -114,9 +122,13 @@ class Client:
         self.chat.clear()
         self.board.clear(False)
         self.word_container.clear()
+        self.hints.clear(False)
+
+        self.word_container.update(self.initial_hint)
 
         if self.server and self.server.drawing_player_name == self.name:
             self.board.clear(True)
+            self.hints.clear(True)
             self.word_container.update(self.server.word_of_the_round)
             self.ranking.update(self.server.ranking)
 
@@ -172,6 +184,9 @@ class Client:
                             self.mode = "erase"
                             self.pen_previous_color = self.pen_color if self.pen_color != "white" else self.pen_previous_color
                             self.pen_color = "white"
+                        elif self.hints.is_hint_clicked(x, y):
+                            self.music_player.play_sound_effect("button_click")
+                            self.hints.give_hint()
 
                 elif event.type == pygame.MOUSEBUTTONUP:
                     self.is_board_pressed = False
@@ -236,6 +251,7 @@ class Client:
                 self.error = "Oops!"
             
             self.initial_board = object["data"].get("board")
+            self.initial_hint = object["data"].get("hint")
 
         initial_packet = self.connected_client.recv(game_consts.MESSAGE_LENGTH_HEADER_LENGTH).decode(game_consts.DEFAULT_STRING_FORMAT)
 

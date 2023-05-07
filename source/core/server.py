@@ -28,7 +28,8 @@ class Server:
         self.round_start_time = datetime.datetime.now()
         self.correct_answers = []
         self.board_until_now = []
-        self.gave_hints = 0
+        self.gaven_hints = 0
+        self.present_hint = ""
         self.open = True
 
         self.game_client = game_client
@@ -54,7 +55,8 @@ class Server:
                 self.drawing_player_name = self.client_names[random.randint(0, len(self.client_names)-1)]
                 self.correct_answers = []
                 self.board_until_now = []
-                self.gave_hints = 0
+                self.gaven_hints = 0
+                self.present_hint = ""
 
                 if self.ranking[0]["score"] < 120:
                     new_round_message = {
@@ -103,6 +105,22 @@ class Server:
                 threading.Thread(target=self.handle_new_client, args=(connection, address)).start()
             except:
                 return
+            
+    def handle_new_hint(self):
+        hint = ""
+        
+        if self.gaven_hints == 0:
+            hint = " ".join(["_" for _ in range(len(self.word_of_the_round))])
+        else:
+            hint = ["_" for _ in range(len(self.word_of_the_round))]
+
+            random_index = random.randint(0, len(self.word_of_the_round))
+            hint[random_index] = self.word_of_the_round[random_index]
+
+            hint = " ".join(hint)
+            self.present_hint = hint
+
+        return hint
 
     def handle_new_client(self, connection: socket.socket, address):
         while True:
@@ -123,7 +141,7 @@ class Server:
                             self.clients.append(connection)
                             self.client_names.append(object["data"]["name"])
                             self.ranking.append({ "name": object["data"]["name"], "score": 0})
-                            object["data"] = {"success": True, "board": self.board_until_now}
+                            object["data"] = {"success": True, "board": self.board_until_now, "hint": self.present_hint}
                         else:
                             object["data"] = {"success": False}
 
@@ -139,13 +157,13 @@ class Server:
                         
                         if object["data"] == self.word_of_the_round:
                             correct_answers_length = len(self.correct_answers)
-                            if correct_answers_length + self.gave_hints < 10:
-                                self.ranking[connection_index]["score"] += 10 - correct_answers_length - self.gave_hints
+                            if correct_answers_length + self.gaven_hints < 10:
+                                self.ranking[connection_index]["score"] += 10 - correct_answers_length - self.gaven_hints
                             else:
                                 self.ranking[connection_index]["score"] += 1
 
                             if correct_answers_length == 0:
-                                self.ranking[drawing_player_index]["score"] += 11 - self.gave_hints
+                                self.ranking[drawing_player_index]["score"] += 11 - self.gaven_hints
                             else:
                                 self.ranking[drawing_player_index]["score"] += 2
 
@@ -154,6 +172,19 @@ class Server:
                             object["data"] = self.ranking
                         else:
                             object["data"] = f"{author}: {object['data']}"
+
+                    elif object["type"] == "hint":
+                        if self.gaven_hints == 2:
+                            continue
+
+                        connection_index = self.clients.index(connection)
+                        author = self.client_names[connection_index]
+
+                        if author != self.drawing_player_name:
+                            continue
+
+                        object["data"] = self.handle_new_hint()
+
 
                     if object["type"] == "match_info" or object["type"] == "join":
                         connection.sendall(ProtocolParsing.parse(object))
@@ -175,6 +206,12 @@ class Server:
                     elif object["type"] == "ranking_update":
                         for client in self.clients:
                             client.sendall(ProtocolParsing.parse(object))
+                    elif object["type"] == "hint":
+                        self.gaven_hints += 1
+
+                        for client in self.clients:
+                            if client != connection:
+                                client.sendall(ProtocolParsing.parse(object))
                     else:
                         if object["type"] == "board_update":
                             self.board_until_now.append(object["data"])
