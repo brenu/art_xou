@@ -31,6 +31,7 @@ class Server:
         self.gaven_hints = 0
         self.present_hint = ""
         self.open = True
+        self.reset = False
 
         self.game_client = game_client
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -48,8 +49,8 @@ class Server:
         while True:
             time.sleep(0.1)
             if self.open == False:
-                return
-            if (datetime.datetime.now() >= self.round_start_time + datetime.timedelta(minutes=2)) or (len(self.clients) > 1 and len(self.correct_answers) == len(self.clients)-1):
+                continue
+            if (datetime.datetime.now() >= self.round_start_time + datetime.timedelta(minutes=3)) or (len(self.clients) > 1 and len(self.correct_answers) == len(self.clients)-1) or self.reset:
                 self.round_start_time = datetime.datetime.now()
                 self.word_of_the_round = self.possible_words[random.randint(0, len(self.possible_words)-1)]
                 self.drawing_player_name = self.client_names[random.randint(0, len(self.client_names)-1)]
@@ -58,7 +59,43 @@ class Server:
                 self.gaven_hints = 0
                 self.present_hint = ""
 
-                if self.ranking[0]["score"] < 120:
+                if self.reset:
+                    self.reset = False
+                    for index, _ in enumerate(self.ranking):
+                        self.ranking[index]["score"] = 0
+
+                    object = {
+                        "type": "ranking_update",
+                        "data": self.ranking,
+                    }
+                    parsed_object = ProtocolParsing.parse(object)
+
+                    for client in self.clients:
+                            client.sendall(parsed_object)
+
+                    new_round_message = {
+                        "type": "new_round",
+                        "data": {}
+                    }
+
+                    message = json.dumps(new_round_message).encode(game_consts.DEFAULT_STRING_FORMAT)
+                    message_length = ("0"*(game_consts.MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(message)))) + str(len(message))).encode(game_consts.DEFAULT_STRING_FORMAT)
+
+                    new_round_message["data"]["word"] = self.word_of_the_round
+
+
+                    special_message = json.dumps(new_round_message).encode(game_consts.DEFAULT_STRING_FORMAT)
+                    special_message_length = ("0"*(game_consts.MESSAGE_LENGTH_HEADER_LENGTH - len(str(len(special_message)))) + str(len(special_message))).encode(game_consts.DEFAULT_STRING_FORMAT)
+
+                    for index, connection in enumerate(self.clients):
+                        if self.client_names[index] == self.drawing_player_name:
+                            connection.sendall(special_message_length)
+                            connection.sendall(special_message)
+                        else:
+                            connection.sendall(message_length)
+                            connection.sendall(message)
+
+                elif self.ranking[0]["score"] < 120:
                     new_round_message = {
                         "type": "new_round",
                         "data": {}
@@ -95,6 +132,7 @@ class Server:
                         connection.sendall(message_length)
                         connection.sendall(message)
 
+                    self.open = False
 
     def handle_connections(self):
         self.server.listen()
@@ -140,7 +178,7 @@ class Server:
                         if not object["data"]["name"] in self.client_names:
                             self.clients.append(connection)
                             self.client_names.append(object["data"]["name"])
-                            self.ranking.append({ "name": object["data"]["name"], "score": 0})
+                            self.ranking.append({ "name": object["data"]["name"], "score": 110})
                             object["data"] = {"success": True, "board": self.board_until_now, "hint": self.present_hint}
                         else:
                             object["data"] = {"success": False}
@@ -212,6 +250,13 @@ class Server:
                         for client in self.clients:
                             if client != connection:
                                 client.sendall(ProtocolParsing.parse(object))
+                    elif object["type"] == "match_reset":
+                        if self.clients.index(connection) == 0:
+                            for client in self.clients:
+                                client.sendall(ProtocolParsing.parse(object))
+
+                        self.open = True
+                        self.reset = True
                     else:
                         if object["type"] == "board_update":
                             self.board_until_now.append(object["data"])

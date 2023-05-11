@@ -4,6 +4,7 @@ from source.screens.match_finder import MatchFinder
 from source.screens.menu import Menu
 from source.screens.match_creator import MatchCreator
 from source.core.music_player import MusicPlayer
+from source.screens.match_end import MatchEnd
 
 def main():
     pygame.mixer.init()
@@ -12,7 +13,7 @@ def main():
     pygame.display.set_caption("Art Xou")
 
     music_player = MusicPlayer()
-    music_player.play_track("main_theme")
+    # music_player.play_track("main_theme")
 
     palette = {
         "blue": (30,129,176),
@@ -35,29 +36,41 @@ def main():
     menu = None
     match_finder = None
     match_creator = None
+    match_end = None
 
     while True:
         if not ran:
             ran = True
-            if mode == "menu":
+            if client and client.reset:
+                client.reset = False
+                client.match_reset_ui()
+            elif mode == "menu":
                 menu = Menu(screen, palette, music_player)
                 menu.run()
             elif mode == "game":
 
-                client = Client(
-                    screen,
-                    palette, 
-                    match_creator.player_name_input.value if match_creator else match_finder.player_name_input.value,
-                    match_finder.selected_match["address"].split(":") if match_finder else ("localhost", 65432),
-                    music_player,
-                    menu.server,
-                    match_creator.match_name_input.value if match_creator else ""
-                )
+                if not match_end:
+                    client = Client(
+                        screen,
+                        palette, 
+                        match_creator.player_name_input.value if match_creator else match_finder.player_name_input.value,
+                        match_finder.selected_match["address"].split(":") if match_finder else ("localhost", 65432),
+                        music_player,
+                        menu.server,
+                        match_creator.match_name_input.value if match_creator else ""
+                    )
 
-                match_creator = None
-                match_finder = None
+                    match_creator = None
+                    match_finder = None
 
-                client.run()
+                    client.run()
+                else:
+                    if client.server:
+                        client.match_reset()
+
+                    match_end = None
+                    client.navigate = None
+                
             elif mode == "match_finder":
                 match_creator = None
                 match_finder = MatchFinder(screen, palette, music_player)
@@ -66,6 +79,9 @@ def main():
                 match_finder = None
                 match_creator = MatchCreator(screen, palette, music_player)
                 match_creator.run()
+            elif mode == "match_end":
+                match_end = MatchEnd(screen, client, palette, music_player, True if client.server else False, client.ranking)
+                match_end.run()
         else:
             if mode == "menu" and menu.navigate:
                 ran = False
@@ -73,13 +89,19 @@ def main():
             elif mode == "game" and client.navigate:
                 ran = False
                 mode = client.navigate
-                client = None
+                if mode != "match_end" and mode != "game":
+                    client = None
+            elif mode == "game" and client.reset:
+                ran = False
             elif mode == "match_finder" and match_finder.navigate:
                 ran = False
                 mode = match_finder.navigate
             elif mode == "match_creator" and match_creator.navigate:
                 ran = False
                 mode = match_creator.navigate
+            elif mode == "match_end" and match_end.navigate:
+                ran = False
+                mode = match_end.navigate
 
 
 if __name__ == "__main__":

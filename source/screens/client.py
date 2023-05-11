@@ -22,6 +22,7 @@ class Client:
         self.navigate = None
         self.name = name
         self.music_player = music_player
+        self.reset = False
 
         self.default_padding = 14
         self.palette = palette
@@ -66,6 +67,47 @@ class Client:
             self.navigate = "menu"
             self.error = "Não foi possível se conectar ao servidor"
 
+    def match_reset(self):
+        if not self.server:
+            return False
+
+        self.connected_client.sendall(ProtocolParsing.parse({
+            "type": "match_reset",
+            "data": {}
+        }))
+
+        while not self.reset:
+            continue
+
+        return True
+
+    def match_reset_ui(self):
+        self.screen.fill(self.palette["blue"])
+        self.is_board_pressed = False
+        self.pen_radius = 3
+        self.pen_color = "black"
+        self.pen_previous_color = "black"
+        self.mode = "paint"
+
+        self.previous_points = 0
+        self.initial_board = []
+        self.initial_ranking = []
+        self.initial_hint = ""
+
+        self.word_to_draw = None
+               
+        self.board = Board(600, 400, self, self.palette)
+        pygame.display.update()
+
+        self.ranking = Ranking(188, 400, self, self.palette)
+        self.chat = Chat(435, 696, self, self.palette)
+        self.word_container = WordContainer(600,225, self, self.palette)
+        self.hints = Hints(188, 50, self, self.palette)
+
+        self.reset = False
+        self.navigate = False
+
+        self.run()
 
     def handle_incoming_data(self):
         while True:
@@ -107,8 +149,14 @@ class Client:
                     elif object["type"] == "hint":
                         self.word_container.update(object["data"])
                     elif object["type"] == "match_end":
-                        pass # We're not doing anything yet, but the idea is to navigate to another screen with the top 3
-            except:
+                        self.ranking = object["data"].get("ranking")
+                        self.navigate = "match_end"
+                    elif object["type"] == "match_reset":
+                        self.navigate = "game"
+                        self.reset = True
+                        
+            except Exception as e:
+                print(e)
                 self.navigate = "menu"
                 self.error = "Houve um problema de conexão com a partida!"
                 return
@@ -162,7 +210,8 @@ class Client:
         self.is_running = True
         while True: 
             if self.navigate:
-                self.close_server_sockets()
+                if self.navigate != "match_end" and self.navigate != "game":
+                    self.close_server_sockets()
                 return
 
             ( x, y ) = pygame.mouse.get_pos()
