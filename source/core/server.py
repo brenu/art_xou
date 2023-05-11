@@ -178,7 +178,7 @@ class Server:
                         if not object["data"]["name"] in self.client_names:
                             self.clients.append(connection)
                             self.client_names.append(object["data"]["name"])
-                            self.ranking.append({ "name": object["data"]["name"], "score": 110})
+                            self.ranking.append({ "name": object["data"]["name"], "score": 0})
                             object["data"] = {"success": True, "board": self.board_until_now, "hint": self.present_hint}
                         else:
                             object["data"] = {"success": False}
