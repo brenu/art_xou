@@ -65,7 +65,7 @@ class Chat:
             self.messages.pop()
 
     def send_answer(self, answer):
-        self.update_messages_list(f"You: {answer}")
+        self.update_messages_list(f"Você: {answer}")
         
         answer = json.dumps({
             "type": "answer",
