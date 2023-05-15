@@ -10,7 +10,7 @@ from source.core.protocol_parsing import ProtocolParsing
 game_consts = GameConsts()
 
 class Server:
-    def __init__(self, game_client, match_name):
+    def __init__(self, game_client, match_name, words=[]):
         temporary_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         temporary_socket.connect(("8.8.8.8", 80)) # The whole idea here is to just create a socket and get our local IP. It doesn't really have to connect
     
@@ -19,7 +19,7 @@ class Server:
         self.port = game_consts.DEFAULT_PORT
         self.server_address = (self.host, self.port)
         
-        self.possible_words = open("source/core/words.txt", "r", encoding="utf-8").read().splitlines()
+        self.possible_words = open("source/core/words.txt", "r", encoding="utf-8").read().splitlines() if not words else words
         self.clients = []
         self.client_names = []
         self.ranking = []

@@ -17,7 +17,7 @@ from source.core.game_consts import GameConsts
 game_consts = GameConsts()
 
 class Client:
-    def __init__(self, screen, palette, name, game_address, music_player, server=False, match_name=""):
+    def __init__(self, screen, palette, name, game_address, music_player, server=False, match_name="", words=[]):
         self.screen = screen
         self.navigate = None
         self.name = name
@@ -50,7 +50,7 @@ class Client:
         self.word_container = WordContainer(600,225, self, self.palette)
         self.hints = Hints(188, 50, self, self.palette)
 
-        self.server = Server(self, match_name) if server == True else None
+        self.server = Server(self, match_name, words) if server == True else None
         
         self.connected_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 

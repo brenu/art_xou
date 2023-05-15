@@ -20,6 +20,7 @@ def main():
         "white": (255,255,255),
         "black": (10,10,10),
         "red": (255, 85, 85),
+        "red_delete": (229, 85, 85),
         "cyano": (68, 187, 187),
         "green": (96, 210, 5),
         "purple": (136, 58, 234),
@@ -27,7 +28,10 @@ def main():
         "yellow": (253, 227, 137),
         "orange": (254, 171, 95), 
         "navy_blue": (29, 89, 132),
-        "gray_border": (231, 228, 228)
+        "navy_blue_hover": (19, 79, 122),
+        "gray_border": (231, 228, 228),
+        "blue_secondary_buttons": (40, 111, 162),
+        "blue_secondary_buttons_hover": (30, 101, 152),
     }
     mode = "menu"
     ran = False
@@ -57,7 +61,8 @@ def main():
                         match_finder.selected_match["address"].split(":") if match_finder else ("localhost", 65432),
                         music_player,
                         menu.server,
-                        match_creator.match_name_input.value if match_creator else ""
+                        match_creator.match_name_input.value if match_creator else "",
+                        words=[*match_creator.words] if menu.server else []
                     )
 
                     match_creator = None
