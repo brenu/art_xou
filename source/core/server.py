@@ -19,7 +19,7 @@ class Server:
         self.port = game_consts.DEFAULT_PORT
         self.server_address = (self.host, self.port)
         
-        self.possible_words = open("source/core/words.txt", "r", encoding="utf-8").read().splitlines() if not words else words
+        self.possible_words = open("assets/words.txt", "r", encoding="utf-8").read().splitlines() if not words else words
         self.clients = []
         self.client_names = []
         self.ranking = []

@@ -12,18 +12,30 @@ class Menu():
         self.screen.fill(self.palette["blue"])
         self.font = pygame.font.Font("assets/fonts/IBMPlexMono-Regular.ttf", 20)
 
-        self.join_button = pygame.Rect(0, 0, 300, 50)
+        self.title_font = pygame.font.Font("assets/fonts/CaveatBrush-Regular.ttf", 100)
+
+        self.join_button = pygame.Rect(0, 0, 450, 50)
         self.join_button.center = (1280/2, 720/2 - 70)
 
-        self.create_button = pygame.Rect(0, 0, 300, 50)
+        self.icon_picture = pygame.image.load("assets/icons/menu_icon.png").convert_alpha()
+        self.icon_picture = pygame.transform.smoothscale(self.icon_picture, (self.icon_picture.get_width()*0.25, self.icon_picture.get_height()*0.25))
+
+        self.create_button = pygame.Rect(0, 0, 450, 50)
         self.create_button.center = (1280/2, 720/2)
+        
+        self.hover_on = -1
 
         self.navigate = None
         self.draw_base_components()
 
     def draw_base_components(self):
-        pygame.draw.rect(self.screen, self.palette["navy_blue"], self.join_button, 0, 5)
-        pygame.draw.rect(self.screen, self.palette["navy_blue"], self.create_button, 0, 5)
+        pygame.draw.rect(self.screen, self.palette["navy_blue"] if self.hover_on != 0 else self.palette["navy_blue_hover"], self.join_button, 0, 5)
+        pygame.draw.rect(self.screen, self.palette["navy_blue"] if self.hover_on != 1 else self.palette["navy_blue_hover"], self.create_button, 0, 5)
+
+        create_text = self.title_font.render("Art Xou", True, self.palette["white"])        
+        self.screen.blit(create_text, create_text.get_rect(center=(1280/2, 720/8)))
+
+        self.screen.blit(self.icon_picture, self.icon_picture.get_rect(center=(1280/2+create_text.get_rect().width/2+35, 720/8-30)))
 
         create_text = self.font.render("entrar em partida", True, self.palette["white"])        
         self.screen.blit(create_text, create_text.get_rect(center=self.join_button.center))
@@ -35,11 +47,11 @@ class Menu():
 
     def run(self):
         self.screen.fill(self.palette["blue"])
-        self.draw_base_components()
         while True:
             if self.navigate:
                 return
             
+            self.draw_base_components()
             ( x, y ) = pygame.mouse.get_pos()
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -53,12 +65,22 @@ class Menu():
                 elif event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                else:
+                    self.check_buttons_hover(x, y)
 
             
             self.draw_screen()
 
     def stop(self):
         self.is_running = False
+
+    def check_buttons_hover(self, x, y):
+        if self.create_button.collidepoint(x, y):
+            self.hover_on = 1
+        elif self.join_button.collidepoint(x, y):
+            self.hover_on = 0
+        else:
+            self.hover_on = -1
 
     def has_clicked_create_button(self, x, y):
         return self.create_button.collidepoint(x, y)

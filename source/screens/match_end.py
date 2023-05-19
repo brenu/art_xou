@@ -30,6 +30,7 @@ class MatchEnd:
         self.match_reset_button.center = (1280/2, 720-60)
 
     def run(self):
+        self.music_player.play_track("match_end")
         self.draw_base_components()
         while True:
             if self.navigate:

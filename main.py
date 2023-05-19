@@ -13,7 +13,7 @@ def main():
     pygame.display.set_caption("Art Xou")
 
     music_player = MusicPlayer()
-    # music_player.play_track("main_theme")
+    music_player.play_track("main_theme")
 
     palette = {
         "blue": (30,129,176),
@@ -47,6 +47,7 @@ def main():
             ran = True
             if client and client.reset:
                 client.reset = False
+                music_player.play_track("main_theme")
                 client.match_reset_ui()
             elif mode == "menu":
                 menu = Menu(screen, palette, music_player)

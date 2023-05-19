@@ -31,8 +31,10 @@ class MatchFinder:
         self.player_name_input.cursor_color = palette["white"]
         self.player_name_input.font_object = self.font
         self.player_name_input.cursor_width = 2
-        self.player_name_rect = pygame.Rect(0, 0, 300, 50)
+        self.player_name_rect = pygame.Rect(0, 0, 400, 50)
         self.player_name_rect.center = (1280/2, 720*0.15)
+
+        self.hover_on = -1
 
         self.draw_base_components()
 
@@ -73,6 +75,8 @@ class MatchFinder:
                 elif event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                else:
+                    self.check_hover_on_matches(x,y)
 
     def has_clicked_on_match(self, x, y):
         for index, match in enumerate(self.matches):
@@ -80,6 +84,16 @@ class MatchFinder:
                 self.music_player.play_sound_effect("button_click")
                 self.selected_match = self.matches[index]
                 return True
+            
+    def check_hover_on_matches(self, x,y):
+        for index, match in enumerate(self.matches):
+            if match["button"].collidepoint(x, y):
+                self.selected_match = self.matches[index]
+                self.hover_on = index
+                return
+            
+        self.hover_on = -1
+        return
 
     def get_available_matches(self):
         default_gateway = netifaces.gateways()['default'][netifaces.AF_INET][0]
@@ -110,16 +124,15 @@ class MatchFinder:
         for index, match in enumerate(self.matches):
             create_text = self.font.render(match.get("name"), True, self.palette["white"])
             create_text_rect = create_text.get_rect()
-            create_text_rect.center = (1280/2, 250+(index*50))
+            create_text_rect.center = (1280/2, 250+(index*70))
 
             match_button = pygame.Rect(0, 0, 450, 50)
-            match_button.center = (1280/2, 250+(index*50))
+            match_button.center = (1280/2, 250+(index*70))
 
             self.matches[index]["button"] = match_button
 
-            pygame.draw.rect(self.screen, self.palette["navy_blue"], match_button, 0, 10)
+            pygame.draw.rect(self.screen, self.palette["navy_blue"] if self.hover_on != index else self.palette["navy_blue_hover"], match_button, 0, 10)
             self.screen.blit(create_text, create_text_rect)
-            self.draw_screen()
 
     def handle_match_info(self, connection: socket.socket):
         connection.settimeout(None)
