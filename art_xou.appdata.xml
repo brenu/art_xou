@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+    <id>art-xou</id>
+    <metadata_license>MIT</metadata_license>
+    <project_license>Python-2.0</project_license>
+    <name>Art Xou</name>
+    <summary>Jogo sério, com temática de desenhos, para ser jogado em sala de aula ou em laboratórios</summary>
+    <description>
+        <p>Jogo sério, com temática de desenhos, para ser jogado em sala de aula ou em laboratórios. É inspirado no Gartic, e segue uma dinâmica semelhante, mas foi desenvolvido para ser jogado em rede local, de forma com que não seja necessária uma conexão com a internet para ser jogado. Dessa forma, espera-se que ele seja uma ferramenta de auxílio na educação infantil mais acessível às escolas que não possuem internet banda larga</p>
+    </description>
+    <launchable type="desktop-id">art_xou.desktop</launchable>
+    <url type="homepage">https://github.com/brenu/art_xou</url>
+    <provides>
+        <binary>python{{ python-version }}</binary>
+    </provides>
+</component>

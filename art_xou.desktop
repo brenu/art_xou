@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=art_xou
+Exec=art_xou
+Comment=Jogo sério, com temática de desenhos, para ser jogado em sala de aula ou em laboratórios. É inspirado no Gartic, e segue uma dinâmica semelhante, mas foi desenvolvido para ser jogado em rede local, de forma com que não seja necessária uma conexão com a internet para ser jogado. Dessa forma, espera-se que ele seja uma ferramenta de auxílio na educação infantil mais acessível às escolas que não possuem internet banda larga
+Icon=game_icon
+Categories=System;
+Terminal=false
