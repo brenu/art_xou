@@ -276,7 +276,11 @@ class Server:
             except:
                 break
 
-        Utils.close_connection(connection)
+        try:
+            Utils.close_connection(connection)
+        except:
+            pass
+
         if connection in self.clients:
             connection_index = self.clients.index(connection)
             self.clients.pop(connection_index)

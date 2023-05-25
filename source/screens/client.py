@@ -182,7 +182,10 @@ class Client:
             self.ranking.update(self.server.ranking)
 
     def close_server_sockets(self):
-        Utils.close_connection(self.connected_client)
+        try:
+            Utils.close_connection(self.connected_client)
+        except:
+            pass
 
         if self.server:
             for client in self.server.clients:

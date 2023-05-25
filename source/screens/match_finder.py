@@ -116,9 +116,15 @@ class MatchFinder:
             self.handle_match_info(match_socket, address)
             Utils.close_connection(match_socket)
             return
-        except:
+        except TimeoutError:
             Utils.close_connection(match_socket)
             return
+        except ConnectionRefusedError:
+            return
+        except Exception as e:
+            Utils.close_connection(match_socket)
+            return
+
 
     def draw_available_matches(self):
         for index, match in enumerate(self.matches):
