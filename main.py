@@ -6,6 +6,14 @@ from source.screens.match_creator import MatchCreator
 from source.core.music_player import MusicPlayer
 from source.screens.match_end import MatchEnd
 
+# import threading
+# import psutil
+# import time
+
+# monitoring = {
+#     "running": False,
+# }
+
 def main():
     pygame.mixer.init()
     pygame.init()
@@ -41,6 +49,8 @@ def main():
     match_finder = None
     match_creator = None
     match_end = None
+
+    # threading.Thread(target=resources_monitoring).start()
 
     while True:
         if not ran:
@@ -96,6 +106,7 @@ def main():
                 ran = False
                 mode = client.navigate
                 if mode != "match_end" and mode != "game":
+                    # monitoring["running"] = False
                     client = None
             elif mode == "game" and client.reset:
                 ran = False
@@ -109,6 +120,23 @@ def main():
                 ran = False
                 mode = match_end.navigate
 
+# def resources_monitoring():
+#     cpu_percentages = []
+#     memory_usages = []
+#     process = psutil.Process()
+
+#     monitoring["running"] = True
+#     while monitoring["running"] == True:
+#         time.sleep(5)
+#         memory_usage = process.memory_full_info().uss/1000000
+#         cpu_usage = process.cpu_percent()
+
+#         print(f"Memória: {memory_usage} MB    CPU: {cpu_usage}%")
+
+#         cpu_percentages.append(cpu_usage)
+#         memory_usages.append(memory_usage)
+
+#     print(f"Memória (média): {sum(memory_usages)/len(memory_usages)} MB    CPU (média): {sum(cpu_percentages)/len(cpu_percentages)}%")
 
 if __name__ == "__main__":
     main()

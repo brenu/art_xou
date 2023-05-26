@@ -6,6 +6,7 @@ import datetime
 import time
 from source.core.game_consts import GameConsts
 from source.core.protocol_parsing import ProtocolParsing
+from source.core.utils import Utils
 
 game_consts = GameConsts()
 
@@ -31,6 +32,7 @@ class Server:
         self.gaven_hints = 0
         self.present_hint = ""
         self.open = True
+        self.exit = False
         self.reset = False
 
         self.game_client = game_client
@@ -48,6 +50,8 @@ class Server:
     def handle_rounds(self):
         while True:
             time.sleep(0.1)
+            if self.exit == True:
+                return
             if self.open == False:
                 continue
             if (datetime.datetime.now() >= self.round_start_time + datetime.timedelta(minutes=3)) or (len(self.clients) > 1 and len(self.correct_answers) == len(self.clients)-1) or self.reset:
@@ -226,10 +230,10 @@ class Server:
 
                     if object["type"] == "match_info" or object["type"] == "join":
                         connection.sendall(ProtocolParsing.parse(object))
-
+                        
+                        if object["type"] == "match_info":
+                            break
                         if object["data"].get("success") == False:
-                            connection.shutdown(socket.SHUT_RDWR)
-                            connection.close()
                             break
                         elif object["type"] == "join":
                             for client in self.clients:
@@ -269,18 +273,11 @@ class Server:
                                 client.sendall(ProtocolParsing.parse(object))
                 else:
                     break
-            except Exception as e:
+            except:
                 break
 
-        try:
-            connection.shutdown(socket.SHUT_RDWR)
-        except:
-            pass
-
-        connection.close()
-
+        Utils.close_connection(connection)
         if connection in self.clients:
-            connection.close()
             connection_index = self.clients.index(connection)
             self.clients.pop(connection_index)
             self.client_names.pop(connection_index)

@@ -8,6 +8,7 @@ import netifaces
 
 
 from source.core.game_consts import GameConsts
+from source.core.utils import Utils
 game_consts = GameConsts()
 
 class MatchFinder:
@@ -80,14 +81,14 @@ class MatchFinder:
 
     def has_clicked_on_match(self, x, y):
         for index, match in enumerate(self.matches):
-            if match["button"].collidepoint(x, y):
+            if match.get("button") and match["button"].collidepoint(x, y):
                 self.music_player.play_sound_effect("button_click")
                 self.selected_match = self.matches[index]
                 return True
             
     def check_hover_on_matches(self, x,y):
         for index, match in enumerate(self.matches):
-            if match["button"].collidepoint(x, y):
+            if match.get("button") and match["button"].collidepoint(x, y):
                 self.selected_match = self.matches[index]
                 self.hover_on = index
                 return
@@ -98,7 +99,6 @@ class MatchFinder:
     def get_available_matches(self):
         default_gateway = netifaces.gateways()['default'][netifaces.AF_INET][0]
         splitted_network_address = default_gateway.split(".")[:3]
-        
 
         for i in range(2, 255):
             possible_device_address = f"{'.'.join(splitted_network_address)}.{i}"
@@ -113,11 +113,11 @@ class MatchFinder:
         try:
             match_socket.connect((address, 65432))
 
-            self.handle_match_info(match_socket)
-            match_socket.shutdown(socket.SHUT_RDWR)
-            match_socket.close()
+            self.handle_match_info(match_socket, address)
+            Utils.close_connection(match_socket)
+            return
         except:
-            match_socket.close()
+            Utils.close_connection(match_socket)
             return
 
     def draw_available_matches(self):
@@ -134,7 +134,7 @@ class MatchFinder:
             pygame.draw.rect(self.screen, self.palette["navy_blue"] if self.hover_on != index else self.palette["navy_blue_hover"], match_button, 0, 10)
             self.screen.blit(create_text, create_text_rect)
 
-    def handle_match_info(self, connection: socket.socket):
+    def handle_match_info(self, connection: socket.socket, address):
         connection.settimeout(None)
         match_info_request = json.dumps({
             "type": "match_info"
@@ -152,7 +152,7 @@ class MatchFinder:
             object = json.loads(message)
 
             if object.get("data",{}).get("name"):
-                address = f"{connection.getsockname()[0]}:{connection.getsockname()[1]}"
+                address = f"{address}:{connection.getsockname()[1]}"
 
                 self.matches.append({
                     "address": address,

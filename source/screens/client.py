@@ -12,6 +12,7 @@ from source.screens.client_partials.word_container import WordContainer
 from source.screens.client_partials.hints import Hints
 from source.core.server import Server
 from source.core.protocol_parsing import ProtocolParsing
+from source.core.utils import Utils
 
 from source.core.game_consts import GameConsts
 game_consts = GameConsts()
@@ -63,7 +64,6 @@ class Client:
             self.initial_ranking = self.join_match()
             threading.Thread(target=self.handle_incoming_data).start()
         except Exception as e:
-            print(e)
             self.navigate = "menu"
             self.error = "Não foi possível se conectar ao servidor"
 
@@ -111,6 +111,8 @@ class Client:
 
     def handle_incoming_data(self):
         while True:
+            if self.navigate and self.navigate != "match_end" and self.navigate != "game":
+                return
             try:
                 initial_packet = self.connected_client.recv(game_consts.MESSAGE_LENGTH_HEADER_LENGTH).decode(game_consts.DEFAULT_STRING_FORMAT)
 
@@ -156,7 +158,6 @@ class Client:
                         self.reset = True
                         
             except Exception as e:
-                print(e)
                 self.navigate = "menu"
                 self.error = "Houve um problema de conexão com a partida!"
                 return
@@ -181,21 +182,17 @@ class Client:
             self.ranking.update(self.server.ranking)
 
     def close_server_sockets(self):
-        self.connected_client.shutdown(socket.SHUT_RDWR)
-        self.connected_client.close()
+        Utils.close_connection(self.connected_client)
+
         if self.server:
             for client in self.server.clients:
                 try:
-                    client.shutdown(socket.SHUT_RDWR)
-                    client.close()
+                    Utils.close_connection(client)
                 except:
                     continue
 
-            try:
-                self.server.server.shutdown(socket.SHUT_RDWR)
-            except:
-                pass
-            self.server.server.close()
+            Utils.close_connection(self.server.server)
+            self.server.exit = True
             self.server.open = False
 
     def run(self):
