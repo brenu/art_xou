@@ -14,10 +14,23 @@ class MusicPlayer:
             "next_word": pygame.mixer.Sound('assets/sfx/freesound_next_word.ogg')
         }
 
+        self.muted = False
+
     def play_track(self, name: str):
-        pygame.mixer.music.load(self.tracks[name])
-        pygame.mixer.music.set_volume(0.5)
-        pygame.mixer.music.play(loops=-1)
+        if not self.muted:
+            pygame.mixer.music.load(self.tracks[name])
+            pygame.mixer.music.set_volume(0.5)
+            pygame.mixer.music.play(loops=-1)
 
     def play_sound_effect(self, name:str):
         pygame.mixer.Sound.play(self.sound_effects[name])
+
+    def change_playing_state(self):
+        self.muted = not self.muted
+
+        if self.muted:
+            pygame.mixer.music.stop()
+        else:
+            pygame.mixer.music.load(self.tracks["main_theme"])
+            pygame.mixer.music.set_volume(0.5)
+            pygame.mixer.music.play(loops=-1)

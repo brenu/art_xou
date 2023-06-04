@@ -52,6 +52,7 @@ def main():
             elif mode == "menu":
                 menu = Menu(screen, palette, music_player)
                 menu.run()
+                match_end = None
             elif mode == "game":
 
                 if not match_end:
@@ -71,11 +72,13 @@ def main():
 
                     client.run()
                 else:
-                    if client.server:
-                        client.match_reset()
+                    if client:
+                        if client.server:
+                            client.match_reset()
+
+                        client.navigate = None
 
                     match_end = None
-                    client.navigate = None
                 
             elif mode == "match_finder":
                 match_creator = None
@@ -92,12 +95,12 @@ def main():
             if mode == "menu" and menu.navigate:
                 ran = False
                 mode = menu.navigate
-            elif mode == "game" and client.navigate:
+            elif mode == "game" and client and client.navigate:
                 ran = False
                 mode = client.navigate
                 if mode != "match_end" and mode != "game":
                     client = None
-            elif mode == "game" and client.reset:
+            elif mode == "game" and client and client.reset:
                 ran = False
             elif mode == "match_finder" and match_finder.navigate:
                 ran = False

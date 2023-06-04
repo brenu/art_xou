@@ -1,6 +1,7 @@
 import pygame
 import pygame_textinput
 import json
+import re
 
 from source.core.game_consts import GameConsts
 game_consts = GameConsts()
@@ -36,6 +37,7 @@ class Chat:
     def update(self, event):
         self.clear()
         self.chat_input.update(event)
+        self.chat_input.value = re.sub(game_consts.inputs_regex, "", self.chat_input.value)
 
         try:
             for item in event:

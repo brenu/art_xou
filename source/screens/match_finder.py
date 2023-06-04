@@ -4,6 +4,7 @@ import sys
 import pygame
 import pygame_textinput
 import threading
+import re
 import netifaces
 
 
@@ -41,7 +42,7 @@ class MatchFinder:
 
     def draw_base_components(self):
         text = self.font.render("Insira seu nome", True, self.palette["white"])
-        pygame.draw.rect(self.screen, self.palette["navy_blue"], self.player_name_rect, 0, 0)
+        pygame.draw.rect(self.screen, self.palette["navy_blue"], self.player_name_rect, 0, 5)
         self.screen.blit(text, text.get_rect(left=self.player_name_rect.left, bottom=self.player_name_rect.top - 10))
         self.screen.blit(self.player_name_input.surface, (self.player_name_rect.left+4, self.player_name_rect.top+10))
 
@@ -66,6 +67,7 @@ class MatchFinder:
             ( x, y ) = pygame.mouse.get_pos()
             events = pygame.event.get()
             self.player_name_input.update(events)
+            self.player_name_input.value = re.sub(game_consts.inputs_regex, "", self.player_name_input.value)
             for event in events:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.has_clicked_on_match(x, y):

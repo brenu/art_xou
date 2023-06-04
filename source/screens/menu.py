@@ -22,6 +22,12 @@ class Menu():
 
         self.create_button = pygame.Rect(0, 0, 450, 50)
         self.create_button.center = (1280/2, 720/2)
+
+        self.mute_button = {
+            "False": pygame.image.load("assets/icons/com_som.png").convert_alpha(),
+            "True": pygame.image.load("assets/icons/sem_som.png").convert_alpha()
+        }
+        self.mute_button_center = (1280-35,10)
         
         self.hover_on = -1
 
@@ -29,8 +35,14 @@ class Menu():
         self.draw_base_components()
 
     def draw_base_components(self):
+        self.screen.fill(self.palette["blue"])
         pygame.draw.rect(self.screen, self.palette["navy_blue"] if self.hover_on != 0 else self.palette["navy_blue_hover"], self.join_button, 0, 5)
         pygame.draw.rect(self.screen, self.palette["navy_blue"] if self.hover_on != 1 else self.palette["navy_blue_hover"], self.create_button, 0, 5)
+        
+        if self.music_player.muted:
+            self.screen.blit(self.mute_button["True"], self.mute_button_center)
+        else:
+            self.screen.blit(self.mute_button["False"], self.mute_button_center)
 
         create_text = self.title_font.render("Art Xou", True, self.palette["white"])        
         self.screen.blit(create_text, create_text.get_rect(center=(1280/2, 720/8)))
@@ -62,6 +74,8 @@ class Menu():
                     elif self.has_clicked_join_button(x, y):
                         self.music_player.play_sound_effect("button_click")
                         self.navigate = "match_finder"
+                    elif self.mute_button["True"].get_rect(center=(self.mute_button_center), width=self.mute_button["True"].get_width()*1.5, height=self.mute_button["True"].get_height()*1.5).collidepoint(x, y):
+                        self.music_player.change_playing_state()
                 elif event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
