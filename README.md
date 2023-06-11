@@ -73,9 +73,9 @@ Ao executar o game, um menu é aberto com duas opções principais:
 
 Para a comunicação entre as partes envolvidas, desenvolvemos um protocolo da camada de aplicação. Nosso protocolo é baseado no TCP, pois a outra opção de transporte (UDP) não oferece garantia de transferência confiável de dados, e parte essencial do funcionamento das partidas é um chat, onde são enviadas as respostas. Nesse cenário queríamos evitar a necessidade de enviar o estado completo do jogo a cada atualização (abordagem comum em games que usam UDP), visto que o Python não é uma linguagem muito performática, em especial quando lidamos com interfaces, então renderizar a tela inteira a cada atualização atrapalharia muito a experiência, em especial do jogador a desenhar. Ao utilizar o TCP, tomamos a liberdade de enviar somente os novos pontos no quadro de desenho, e esses pontos são desenhados na tela individualmente, sem precisarmos renderizar o quadro inteiro N vezes por segundo.
 
-As mensagens trocadas por meio do protocolo possuem uma estrutura sempre bastante semelhante. Seus primeiros 128 bytes são todos dígitos, que indicam o tamanho da mensagem que estará chegando a seguir, no formato JSON. Abaixo, temos um exemplo de mensagem que pode ser enviada entre cliente/servidor:
+As mensagens trocadas por meio do protocolo possuem uma estrutura sempre bastante semelhante. Seus primeiros 8 bytes são todos dígitos, que indicam o tamanho da mensagem que estará chegando a seguir, no formato JSON. Abaixo, temos um exemplo de mensagem que pode ser enviada entre cliente/servidor:
 
-`00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000097{"type": "ranking_update", "data": [{"name": "Erika", "score": 10}, {"name": "Eu", "score": 10}]}`
+`00000097{"type": "ranking_update", "data": [{"name": "Erika", "score": 10}, {"name": "Breno", "score": 10}]}`
 
 Analisando o objeto JSON que contém as mensagens trocadas durante a partida, temos somente dois campos principais:
 * type - indica qual a operação a ser realizada com os dados do campo `data`
